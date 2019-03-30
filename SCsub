@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+import os
+from platform_methods import run_in_subprocess
+import platform_x11_builders
+import distutils.sysconfig
+Import('env')
+
+#Had to modify this script. Otherwise the new platform does not compile
+#./drivers/gl_context/SCsub:if (env["platform"] in ["haiku", "osx", "windows", "x11"]):
+
+common_environment = [\
+"x11_shared.cpp",
+"#platform/x11/crash_handler_x11.cpp",
+"#platform/x11/power_x11.cpp",
+"#platform/x11/context_gl_x11.cpp",
+"#platform/x11/key_mapping_x11.cpp",
+"#platform/x11/joypad_linux.cpp",
+"#platform/x11/detect_prime.cpp"
+]
+
+prog = env.add_program('#bin/godot_shared', ['godot_x11_shared.cpp'] + common_environment)
+
+if (env["debug_symbols"] == "full" or env["debug_symbols"] == "yes") and env["separate_debug_symbols"]:
+    env.AddPostAction(prog, run_in_subprocess(platform_x11_builders.make_debug_x11))
