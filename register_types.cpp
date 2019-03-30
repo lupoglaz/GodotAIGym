@@ -5,7 +5,7 @@
 #include "cSharedMemory.h"
 
 void register_GodotSharedMemory_types() {
-        ClassDB::register_class<cSharedMemory>();
+	ClassDB::register_class<cSharedMemory>();
 }
 
 void unregister_GodotSharedMemory_types() {
