@@ -1,0 +1,10 @@
+# SCsub
+import os
+Import('env')
+
+env_sum = env.Clone()
+
+src_list = ["cSharedMemory.cpp", "register_types.cpp"]
+env_sum.add_source_files(env.modules_sources, src_list)
+
+env.Append(LIBS=["boost_locale", "boost_system", "stdc++", "pthread", "rt"])
