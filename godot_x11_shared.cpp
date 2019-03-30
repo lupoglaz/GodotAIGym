@@ -31,14 +31,38 @@
 #include "main/main.h"
 #include "x11_shared.h"
 
+#include <iostream>
 int main(int argc, char *argv[]) {
 
 	X11_shared os;
 
-	Error err = Main::setup(argv[0], argc - 1, &argv[1]);
-	if (err != OK)
-		return 255;
+	std::cout<<"Searching for a handle"<<std::endl;
+	std::string handle_argument("--handle");
+	bool found = false;
+	int i;
+	for(i=1; i<argc; i++){
+		std::string arg(argv[i]);
+		std::cout<<arg<<std::endl;
+		if(arg == handle_argument){
+			os.set_shared_handle(argv[i+1]);
+			std::cout<<"Found handle = "<<argv[i+1]<<std::endl;
+			found = true;
+			break;
+		}
+	}
+	if(found){
+		std::cout<<"Handle found, arguments left = "<<argc - i - 1<<std::endl;
+		Error err = Main::setup(argv[0], argc - i - 1, &argv[i+2]);
+		if (err != OK)
+			return 255;
+	}else{
+		std::cout<<"Handle not found, arguments left = "<<argc - 1<<std::endl;
+		Error err = Main::setup(argv[0], argc - 1, &argv[1]);
+		if (err != OK)
+			return 255;
+	}
 
+	std::cout<<"Starting main"<<std::endl;
 	if (Main::start())
 		os.run(); // it is actually the OS that decides how to run
 	Main::cleanup();

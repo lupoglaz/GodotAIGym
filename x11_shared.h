@@ -52,6 +52,8 @@
 #include <X11/extensions/Xrandr.h>
 #include <X11/keysym.h>
 
+#include <sstream>
+
 // Hints for X11 fullscreen
 typedef struct {
 	unsigned long flags;
@@ -202,6 +204,9 @@ class X11_shared : public OS_Unix {
 	void *xrandr_handle;
 	Bool xrandr_ext_ok;
 
+	//Handle for the shared memory, that was passed by the parent process
+	std::stringstream shared_handle;
+
 protected:
 	virtual int get_current_video_driver() const;
 
@@ -216,6 +221,15 @@ protected:
 	bool is_window_maximize_allowed();
 
 public:
+	void set_shared_handle(const char *string){
+		shared_handle << string;
+	};
+
+	std::stringstream & get_shared_handle(){
+		return shared_handle;
+	};
+
+
 	virtual String get_name();
 
 	virtual void set_cursor_shape(CursorShape p_shape);
