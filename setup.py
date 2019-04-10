@@ -5,18 +5,15 @@ import sysconfig
 
 if __name__=='__main__':
 	
-	Packages = ['GodotEnv', 
-				#Python modules
-				'Library',
-				]
+	Packages = ['GodotEnv']
 
 	GodotEnv = CppExtension('_GodotEnv', 
 					sources = [ 'src/cGodotSharedInterface.cpp', 
                                 'src/main.cpp'
                             ],
 					include_dirs = ['src'],
-					libraries = ['gomp'],
-					extra_compile_args=['-fopenmp'])
+					libraries = [],
+					extra_compile_args=[])
 	
 	setup(	name='GodotEnv',
 			version="0.1",

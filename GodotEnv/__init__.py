@@ -1,0 +1,1 @@
+from .GodotEnv import add_function
