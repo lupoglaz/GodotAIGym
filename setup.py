@@ -12,7 +12,7 @@ if __name__=='__main__':
                                 'src/main.cpp'
                             ],
 					include_dirs = ['src'],
-					libraries = [],
+					libraries = ['boost_locale', 'boost_system', 'stdc++', 'pthread', 'rt'],
 					extra_compile_args=[])
 	
 	setup(	name='GodotEnv',

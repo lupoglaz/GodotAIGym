@@ -1,5 +1,7 @@
-#include <torch/torch.h>
+#include <torch/extension.h>
 #include <string>
+#include <boost/interprocess/managed_shared_memory.hpp>
+
 struct Pet {
     Pet(const std::string &name) : name(name) { }
     void setName(const std::string &name_) { name = name_; }
@@ -9,3 +11,18 @@ struct Pet {
 };
 
 int add(int i, int j);
+
+using namespace boost::interprocess;
+
+class cSharedMemoryTensor{
+
+    private:
+        std::string *segment_name;
+        managed_shared_memory *segment;        
+        void * shptr;
+    public:
+        cSharedMemoryTensor(const std::string &name);
+        ~cSharedMemoryTensor();
+
+        std::string getHandle() const;  
+};

@@ -19,4 +19,8 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 				return "<example.Pet named '" + a.name + "'>";
 			}
 		);
+
+	py::class_<cSharedMemoryTensor>(m, "SharedMemory")
+		.def(py::init<const std::string &>())
+		.def("getHandle", &cSharedMemoryTensor::getHandle);
 }
