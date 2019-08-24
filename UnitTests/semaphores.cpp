@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <unistd.h>
+#include <fstream>
 
 using namespace boost::interprocess;
 
@@ -23,12 +24,12 @@ int main (int argc, char *argv[])
     try {
         named_semaphore sem(open_or_create, semaphore_name, 0);
 
-        for(int i=0; i<100; i++){
-            
-            sem.post();
-            std::cout<<"c++: "<<i<<std::endl;
-            usleep(100000);
+        for(int i=0; i<10; i++){
             sem.wait();
+            std::ofstream outfile;
+            outfile.open("afile.dat");
+            outfile<<i<<std::endl;
+            outfile.close();
         }
 
         return 0;
