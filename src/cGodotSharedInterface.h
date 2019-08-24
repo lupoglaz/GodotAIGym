@@ -5,7 +5,7 @@
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
-#include <boost/interprocess/sync/named_semaphore.hpp>
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 
 using namespace boost::interprocess;
 
@@ -32,25 +32,33 @@ class cSharedMemoryTensor{
 
 class cSharedMemorySemaphore{
     private:
-        named_semaphore *sem;
         std::string *name;
+        boost::interprocess::interprocess_semaphore *mutex;
     public:
         cSharedMemorySemaphore(const std::string &sem_name, int init_count){
-            this->name = new std::string(sem_name);
-            sem = new named_semaphore(create_only, name->c_str(), init_count);
+            name = new std::string(sem_name);
+            shared_memory_object object(create_only, name->c_str(), read_write);
+            object.truncate(sizeof(boost::interprocess::interprocess_semaphore));
+            mapped_region region( object, read_write);
+            void * addr = region.get_address();
+
+            //Construct the shared structure in memory
+            mutex = new (addr) boost::interprocess::interprocess_semaphore(init_count);
+
         };
         ~cSharedMemorySemaphore(){
-            sem->remove(name->c_str());
-            delete sem;
+            shared_memory_object::remove(name->c_str());
             delete name;
+            delete mutex;
         };
         void post(){
-            sem->post();
+            mutex->post();
         };
         void wait(){
-            sem->wait();
+            mutex->wait();
         };
 };
+
 
 #define ERROR(x) AT_ASSERTM(true, #x)
 #define CHECK_CPU(x) AT_ASSERTM(!(x.type().is_cuda()), #x "must be a CPU tensor")

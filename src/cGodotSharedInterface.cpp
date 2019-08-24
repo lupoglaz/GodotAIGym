@@ -43,4 +43,3 @@ torch::Tensor cSharedMemoryTensor::receive(const std::string &name){
     segment->destroy<IntVector>(name.c_str());
     return T;
 }
-

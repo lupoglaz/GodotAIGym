@@ -7,7 +7,7 @@ import threading
 
 import torch
 import _GodotEnv
-import asyncio
+
 
 
 def launch_process(command):
