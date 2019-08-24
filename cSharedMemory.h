@@ -3,20 +3,33 @@
 #define SUMMATOR_H
 
 #include "core/reference.h"
+#include "core/pool_vector.h"
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <exception>
-#include <math.h>
+
 #include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/interprocess/shared_memory_object.hpp>
+#include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
+#include <boost/exception/all.hpp>
 
 using namespace boost::interprocess;
+
+typedef allocator<int, managed_shared_memory::segment_manager>  ShmemAllocator;
+typedef std::vector<int, ShmemAllocator> IntVector;
+typedef std::vector<float, ShmemAllocator> FloatVector;
+
 
 class cSharedMemory : public Reference {
     GDCLASS(cSharedMemory, Reference);
 
 private:
-    managed_shared_memory *segment;
+    std::string *segment_name = NULL;
+    managed_shared_memory *segment = NULL;
+    shared_memory_object *object = NULL;
 
 protected:
     static void _bind_methods();
@@ -25,8 +38,53 @@ public:
     cSharedMemory();
     ~cSharedMemory();
 
-    int get_int(String name);
-    void send_variable();
+    PoolVector<int> getArray(const String &name);
+    void sendArray(const String &name, const PoolVector<int> &array);
+};
+
+
+class cSharedMemorySemaphore : public Reference {
+    GDCLASS(cSharedMemorySemaphore, Reference);
+    private:
+        std::string *name;
+        boost::interprocess::interprocess_semaphore *mutex;
+    
+    protected:
+        static void _bind_methods();
+    
+    public:
+        cSharedMemorySemaphore(){;};
+        ~cSharedMemorySemaphore(){
+            shared_memory_object::remove(name->c_str());
+            delete name;
+        };
+        void init(const String &sem_name){
+            
+            std::wstring ws = sem_name.c_str();
+	        std::string s_name( ws.begin(), ws.end() );
+            name = new std::string(s_name);
+            std::cout<<"Constructing semaphore "<<name<<std::endl;
+            try{
+                shared_memory_object object(open_only, name->c_str(), read_write);
+                mapped_region region( object, read_write);
+                void * addr = region.get_address();
+
+                //Construct the shared structure in memory
+                mutex = static_cast<boost::interprocess::interprocess_semaphore*>(addr);
+            }catch(boost::interprocess::interprocess_exception &e){
+                std::cout<<boost::diagnostic_information(e)<<std::endl;
+                shared_memory_object::remove(name->c_str());
+            }
+            std::cout<<"Constructed semaphore "<<name<<std::endl;
+        };
+        void post(){
+            std::cout<<"Post semaphore "<<name<<std::endl;
+            mutex->post();
+        };
+        void wait(){
+            std::cout<<"Wait semaphore "<<name<<std::endl;
+            mutex->wait();
+        };
 };
 
 #endif

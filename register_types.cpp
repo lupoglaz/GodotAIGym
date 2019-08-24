@@ -6,6 +6,7 @@
 
 void register_GodotSharedMemory_types() {
 	ClassDB::register_class<cSharedMemory>();
+   ClassDB::register_class<cSharedMemorySemaphore>();
 }
 
 void unregister_GodotSharedMemory_types() {
