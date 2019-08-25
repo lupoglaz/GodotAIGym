@@ -54,30 +54,6 @@ PoolVector<int> cSharedMemory::getArray(const String &name){
 	return data;
 }
 
-PoolVector<int> cSharedMemory::getArrayBlocking(const String &name){
-	std::wstring ws = name.c_str();
-	std::string s_name( ws.begin(), ws.end() );
-
-	
-	PoolVector<int> data;
-	while(True){
-		try{
-			IntVector * shared_vector = segment->find<IntVector> (s_name.c_str()).first;
-			
-			for(int i=0; i<shared_vector->size(); i++){
-				data.push_back( (*shared_vector)[i] );
-			}
-			segment->destroy<IntVector>(s_name.c_str());
-			break;
-		}catch(interprocess_exception &ex){
-			std::cout<<ex.what()<<std::endl;
-		}catch(std::exception &ex){
-			std::cout<<ex.what()<<std::endl;
-		}
-	}
-	return data;
-}
-
 void cSharedMemory::sendArray(const String &name, const PoolVector<int> &array){
 	std::wstring ws = name.c_str();
 	std::string s_name( ws.begin(), ws.end() );
@@ -95,7 +71,6 @@ void cSharedMemory::sendArray(const String &name, const PoolVector<int> &array){
 
 void cSharedMemory::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("getArray", "str"), &cSharedMemory::getArray);
-	ClassDB::bind_method(D_METHOD("getArrayBlocking", "str"), &cSharedMemory::getArray);
 	ClassDB::bind_method(D_METHOD("sendArray", "str", "array"), &cSharedMemory::sendArray);
 }
 
