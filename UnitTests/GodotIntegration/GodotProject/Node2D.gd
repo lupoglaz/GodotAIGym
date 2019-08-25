@@ -12,9 +12,10 @@ func _ready():
 	screen_size = get_viewport_rect().size
 	sem_action.init("sem_action")
 	sem_observation.init("sem_observation")
+	set_physics_process(true)
 	
 
-func _process(delta):
+func _physics_process(delta):
 	
 	sem_action.wait()
 	action = mem.getArray("action")

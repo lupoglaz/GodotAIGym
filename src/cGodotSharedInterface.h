@@ -28,7 +28,6 @@ class cSharedMemoryTensor{
 
         void send(const std::string &name, torch::Tensor T);
         torch::Tensor receive(const std::string &name);
-        torch::Tensor receiveBlocking(const std::string &name);
 };
 
 class cSharedMemorySemaphore{

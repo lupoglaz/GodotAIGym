@@ -32,19 +32,21 @@ class TestGodotEnvironment(unittest.TestCase):
 		action[1] = 1
 		action[2] = 0
 		action[3] = 1
+		with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
+			p = subprocess.Popen(["./TestEnvironment.x86_64", "--handle", "environment"], stdout=out, stderr=err)
 		
-		p = subprocess.Popen(["./TestEnvironment.x86_64", "--handle", "environment"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		time.sleep(1.0)	
 		while p.poll() is None:
 			action = torch.randint(0, 2, (4,), dtype=torch.int, device='cpu')
 			self.mem.send("action", action)
-			print("Sent action", action)
 			self.sem_act.post()
-			print("Waiting")
-			# time.sleep(0.5)
+			print("Sent action", action)
+
+			# print("Waiting")
+			# time.sleep(0.1)
+			
 			self.sem_obs.wait()
 			observation = self.mem.receive("observation")
 			print("Received observation", observation)
-
+		
 if __name__=='__main__':
 	unittest.main()

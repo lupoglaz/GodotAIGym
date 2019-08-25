@@ -55,29 +55,6 @@ torch::Tensor cSharedMemoryTensor::receive(const std::string &name){
     return T;
 }
 
-torch::Tensor cSharedMemoryTensor::receiveBlocking(const std::string &name){
-    torch::Tensor T;
-    try{
-        IntVector *shared_vector = NULL;
-		while(!(shared_vector == NULL)){
-			shared_vector = segment->find<IntVector> (name.c_str()).first;
-		}
-        
-        T = torch::zeros(shared_vector->size(), torch::TensorOptions().dtype(torch::kInt).device(torch::kCPU));
-        
-        for(int i=0; i<shared_vector->size(); i++){
-            T[i] = (*shared_vector)[i];
-        }
-
-        segment->destroy<IntVector>(name.c_str());
-    }catch(interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
-    }catch(std::exception &ex){
-        std::cout<<ex.what()<<std::endl;
-    }
-    return T;
-}
-
 cSharedMemorySemaphore::cSharedMemorySemaphore(const std::string &sem_name, int init_count){
     try{
         name = new std::string(sem_name);
