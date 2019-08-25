@@ -8,7 +8,52 @@
 #include <unistd.h>
 #include <fstream>
 
+#include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/interprocess/shared_memory_object.hpp>
+#include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
+#include <boost/exception/all.hpp>
+
 using namespace boost::interprocess;
+
+
+class cSharedMemorySemaphore {
+    private:
+        std::string *name;
+        mapped_region *region;
+        boost::interprocess::interprocess_semaphore *mutex;
+    
+    public:
+        cSharedMemorySemaphore(){;};
+        ~cSharedMemorySemaphore(){
+            shared_memory_object::remove(name->c_str());
+            delete region;
+            delete name;
+        };
+        void init(const std::string &sem_name){
+            
+            name = new std::string(sem_name);
+            std::cout<<"Constructing semaphore "<<name<<std::endl;
+            try{
+                shared_memory_object object(open_only, name->c_str(), read_write);
+                region = new mapped_region(object, read_write);
+            }catch(boost::interprocess::interprocess_exception &e){
+                std::cout<<boost::diagnostic_information(e)<<std::endl;
+                shared_memory_object::remove(name->c_str());
+            }
+            std::cout<<"Constructed semaphore "<<name<<std::endl;
+        };
+        void post(){
+            std::cout<<"Post semaphore "<<name<<std::endl;
+            mutex = static_cast<interprocess_semaphore*>(region->get_address());
+            mutex->post();
+        };
+        void wait(){
+            std::cout<<"Wait semaphore "<<name<<std::endl;
+            mutex = static_cast<interprocess_semaphore*>(region->get_address());
+            mutex->wait();
+        };
+};
 
 int main (int argc, char *argv[])
 {
@@ -19,10 +64,11 @@ int main (int argc, char *argv[])
     }else{
         semaphore_name = argv[1];
     }
-    // std::cout<<"Segment name = "<<segment_name<<" handle name to read "<<handle_name_read<<" handle name to wite "<<handle_name_write<<std::endl;
+    std::cout<<"Segment name = "<<semaphore_name<<std::endl;
     
     try {
-        named_semaphore sem(open_or_create, semaphore_name, 0);
+        cSharedMemorySemaphore sem;
+        sem.init(semaphore_name);
 
         for(int i=0; i<10; i++){
             sem.wait();

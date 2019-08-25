@@ -48,7 +48,7 @@ class TestSemaphore(unittest.TestCase):
 	"""
 	def setUp(self):
 		output = launch_process(["g++", "semaphores.cpp", "-lpthread", "-lrt"])
-		print(output)
+		print(output[0])
 		self.sem = _GodotEnv.SharedMemorySemaphore("test_semaphore", 0)
 	
 	def runTest(self):

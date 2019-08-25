@@ -23,9 +23,9 @@ class TestGodotEnvironment(unittest.TestCase):
 	"""
 	def setUp(self):
 		self.mem = _GodotEnv.SharedMemoryTensor("environment")
-		self.sem = _GodotEnv.SharedMemorySemaphore("sem3", 0)
-		# print(launch_process(["./TestEnvironment.x86_64", "--handle", "environment"]))
-	
+		self.sem_act = _GodotEnv.SharedMemorySemaphore("sem_action", 0)
+		self.sem_obs = _GodotEnv.SharedMemorySemaphore("sem_observation", 0)
+			
 	def runTest(self):
 		action = torch.ones(4, dtype=torch.int, device='cpu')
 		action[0] = 0 
@@ -33,20 +33,18 @@ class TestGodotEnvironment(unittest.TestCase):
 		action[2] = 0
 		action[3] = 1
 		
-		self.mem.send("action", action)
 		p = subprocess.Popen(["./TestEnvironment.x86_64", "--handle", "environment"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		
-		time.sleep(1.0)
-		self.sem.post()
-
+		time.sleep(1.0)	
 		while p.poll() is None:
+			action = torch.randint(0, 2, (4,), dtype=torch.int, device='cpu')
+			self.mem.send("action", action)
+			print("Sent action", action)
+			self.sem_act.post()
 			print("Waiting")
-			time.sleep(0.1)
-			# self.sem.post()
-			# time.sleep(0.1)
-			# self.sem.wait()
-			# observation = self.mem.receive("observation")
-			# print(observation)
+			# time.sleep(0.5)
+			self.sem_obs.wait()
+			observation = self.mem.receive("observation")
+			print("Received observation", observation)
 
 if __name__=='__main__':
 	unittest.main()

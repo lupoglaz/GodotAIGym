@@ -28,35 +28,19 @@ class cSharedMemoryTensor{
 
         void send(const std::string &name, torch::Tensor T);
         torch::Tensor receive(const std::string &name);
+        torch::Tensor receiveBlocking(const std::string &name);
 };
 
 class cSharedMemorySemaphore{
     private:
         std::string *name;
-        boost::interprocess::interprocess_semaphore *mutex;
+        mapped_region *region;
+        interprocess_semaphore *mutex;
     public:
-        cSharedMemorySemaphore(const std::string &sem_name, int init_count){
-            name = new std::string(sem_name);
-            shared_memory_object object(create_only, name->c_str(), read_write);
-            object.truncate(sizeof(boost::interprocess::interprocess_semaphore));
-            mapped_region region( object, read_write);
-            void * addr = region.get_address();
-
-            //Construct the shared structure in memory
-            mutex = new (addr) boost::interprocess::interprocess_semaphore(init_count);
-
-        };
-        ~cSharedMemorySemaphore(){
-            shared_memory_object::remove(name->c_str());
-            delete name;
-            delete mutex;
-        };
-        void post(){
-            mutex->post();
-        };
-        void wait(){
-            mutex->wait();
-        };
+        cSharedMemorySemaphore(const std::string &sem_name, int init_count);
+        ~cSharedMemorySemaphore();
+        void post();
+        void wait();
 };
 
 

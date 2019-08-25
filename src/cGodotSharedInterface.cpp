@@ -24,22 +24,103 @@ void cSharedMemoryTensor::send(const std::string &name, torch::Tensor T){
     if(segment->find<IntVector>(name.c_str()).first){
         ERROR("Variable already exists");
     }
-
-    const ShmemAllocator alloc_inst (segment->get_segment_manager());
-    IntVector *myvector = segment->construct<IntVector>(name.c_str())(alloc_inst);
-    myvector->resize(T.size(0));
-    myvector->assign(T.data<int>(), T.data<int>() + T.size(0));
-    
+    try{
+        const ShmemAllocator alloc_inst (segment->get_segment_manager());
+        IntVector *myvector = segment->construct<IntVector>(name.c_str())(alloc_inst);
+        myvector->resize(T.size(0));
+        myvector->assign(T.data<int>(), T.data<int>() + T.size(0));
+    }catch(interprocess_exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(std::exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }
 }
 
 torch::Tensor cSharedMemoryTensor::receive(const std::string &name){
-    IntVector *myvector = segment->find<IntVector> (name.c_str()).first;
-    torch::Tensor T = torch::zeros(myvector->size(), torch::TensorOptions().dtype(torch::kInt).device(torch::kCPU));
-    
-    for(int i=0; i<myvector->size(); i++){
-        T[i] = (*myvector)[i];
+    torch::Tensor T;
+    try{
+        IntVector *myvector = segment->find<IntVector> (name.c_str()).first;
+        T = torch::zeros(myvector->size(), torch::TensorOptions().dtype(torch::kInt).device(torch::kCPU));
+        
+        for(int i=0; i<myvector->size(); i++){
+            T[i] = (*myvector)[i];
+        }
+
+        segment->destroy<IntVector>(name.c_str());
+    }catch(interprocess_exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(std::exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }
+    return T;
+}
+
+torch::Tensor cSharedMemoryTensor::receiveBlocking(const std::string &name){
+    torch::Tensor T;
+    try{
+        IntVector *shared_vector = NULL;
+		while(!(shared_vector == NULL)){
+			shared_vector = segment->find<IntVector> (name.c_str()).first;
+		}
+        
+        T = torch::zeros(shared_vector->size(), torch::TensorOptions().dtype(torch::kInt).device(torch::kCPU));
+        
+        for(int i=0; i<shared_vector->size(); i++){
+            T[i] = (*shared_vector)[i];
+        }
+
+        segment->destroy<IntVector>(name.c_str());
+    }catch(interprocess_exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(std::exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }
+    return T;
+}
+
+cSharedMemorySemaphore::cSharedMemorySemaphore(const std::string &sem_name, int init_count){
+    try{
+        name = new std::string(sem_name);
+        shared_memory_object object(open_or_create, name->c_str(), read_write);
+        object.truncate(sizeof(interprocess_semaphore));
+        region = new mapped_region(object, read_write);
+        void *addr = region->get_address();
+        mutex = new (addr) interprocess_semaphore(init_count);
+    }catch(interprocess_exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(std::exception &ex){
+        std::cout<<ex.what()<<std::endl;
     }
 
-    segment->destroy<IntVector>(name.c_str());
-    return T;
+}
+
+cSharedMemorySemaphore::~cSharedMemorySemaphore(){
+    shared_memory_object::remove(name->c_str());
+    delete region;
+    delete name;
+}
+
+void cSharedMemorySemaphore::post(){
+    // std::cout<<"Post semaphore "<<*name<<std::endl;
+    try{
+        mutex = static_cast<interprocess_semaphore*>(region->get_address());
+        mutex->post();
+    }catch(boost::interprocess::interprocess_exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(std::exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }
+    // std::cout<<"Posted semaphore "<<*name<<std::endl;
+}
+void cSharedMemorySemaphore::wait(){
+    // std::cout<<"wait semaphore "<<*name<<std::endl;
+    try{
+        mutex = static_cast<interprocess_semaphore*>(region->get_address());
+        mutex->wait();
+    }catch(boost::interprocess::interprocess_exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(std::exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }
+    // std::cout<<"wait semaphore "<<*name<<std::endl;
 }
