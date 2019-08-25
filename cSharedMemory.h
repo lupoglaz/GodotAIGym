@@ -39,6 +39,7 @@ public:
     ~cSharedMemory();
 
     PoolVector<int> getArray(const String &name);
+    PoolVector<int> getArrayBlocking(const String &name);
     void sendArray(const String &name, const PoolVector<int> &array);
 };
 
@@ -47,7 +48,8 @@ class cSharedMemorySemaphore : public Reference {
     GDCLASS(cSharedMemorySemaphore, Reference);
     private:
         std::string *name;
-        boost::interprocess::interprocess_semaphore *mutex;
+        mapped_region *region;
+        interprocess_semaphore *mutex;
     
     protected:
         static void _bind_methods();
@@ -56,6 +58,7 @@ class cSharedMemorySemaphore : public Reference {
         cSharedMemorySemaphore(){;};
         ~cSharedMemorySemaphore(){
             shared_memory_object::remove(name->c_str());
+            delete region;
             delete name;
         };
         void init(const String &sem_name){
@@ -63,27 +66,27 @@ class cSharedMemorySemaphore : public Reference {
             std::wstring ws = sem_name.c_str();
 	        std::string s_name( ws.begin(), ws.end() );
             name = new std::string(s_name);
-            std::cout<<"Constructing semaphore "<<name<<std::endl;
+            std::cout<<"Constructing semaphore "<<*name<<std::endl;
             try{
                 shared_memory_object object(open_only, name->c_str(), read_write);
-                mapped_region region( object, read_write);
-                void * addr = region.get_address();
-
-                //Construct the shared structure in memory
-                mutex = static_cast<boost::interprocess::interprocess_semaphore*>(addr);
-            }catch(boost::interprocess::interprocess_exception &e){
+                region = new mapped_region(object, read_write);
+            }catch(interprocess_exception &e){
                 std::cout<<boost::diagnostic_information(e)<<std::endl;
                 shared_memory_object::remove(name->c_str());
             }
-            std::cout<<"Constructed semaphore "<<name<<std::endl;
+            std::cout<<"Constructed semaphore "<<*name<<std::endl;
         };
         void post(){
-            std::cout<<"Post semaphore "<<name<<std::endl;
+            std::cout<<"Post semaphore "<<*name<<std::endl;
+            mutex = static_cast<interprocess_semaphore*>(region->get_address());
             mutex->post();
+            std::cout<<"Posted semaphore "<<*name<<std::endl;
         };
         void wait(){
-            std::cout<<"Wait semaphore "<<name<<std::endl;
+            std::cout<<"Wait semaphore "<<*name<<std::endl;
+            mutex = static_cast<interprocess_semaphore*>(region->get_address());
             mutex->wait();
+            std::cout<<"Waited semaphore "<<*name<<std::endl;
         };
 };
 
