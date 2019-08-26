@@ -6,7 +6,7 @@ var mem = cSharedMemory.new()
 var sem_action = cSharedMemorySemaphore.new()
 var sem_observation = cSharedMemorySemaphore.new()
 var action = [0, 1, 0, 0]
-var observation = [100, 100]
+var observation = [1.0, 1.0]
 
 func _ready():
 	screen_size = get_viewport_rect().size
@@ -18,7 +18,7 @@ func _ready():
 func _physics_process(delta):
 	
 	sem_action.wait()
-	action = mem.getArray("action")
+	action = mem.getIntArray("action")
 	var cat = ""
 	for i in action:
 		cat += str(i)
@@ -46,5 +46,5 @@ func _physics_process(delta):
 	for i in observation:
 		cat_obs += str(i)
 	$Label.text += cat_obs
-	mem.sendArray("observation", observation)
+	mem.sendFloatArray("observation", observation)
 	sem_observation.post()

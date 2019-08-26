@@ -13,6 +13,11 @@ typedef allocator<int, managed_shared_memory::segment_manager>  ShmemAllocator;
 typedef std::vector<int, ShmemAllocator> IntVector;
 typedef std::vector<float, ShmemAllocator> FloatVector;
 
+struct TensorDescription{
+    std::string type;       //Tensor scalar type
+    TensorDescription(const std::string &t_type):type(t_type){}
+};
+
 class cSharedMemoryTensor{
 
     private:
@@ -26,8 +31,10 @@ class cSharedMemoryTensor{
         cSharedMemoryTensor(const std::string &name);
         ~cSharedMemoryTensor();
 
-        void send(const std::string &name, torch::Tensor T);
-        torch::Tensor receive(const std::string &name);
+        void sendInt(const std::string &name, torch::Tensor T);
+        void sendFloat(const std::string &name, torch::Tensor T);
+        torch::Tensor receiveInt(const std::string &name);
+        torch::Tensor receiveFloat(const std::string &name);
 };
 
 class cSharedMemorySemaphore{

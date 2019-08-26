@@ -32,12 +32,13 @@ class TestGodotEnvironment(unittest.TestCase):
 		action[1] = 1
 		action[2] = 0
 		action[3] = 1
+		#Important: if this process is called with subprocess.PIPE, the semaphores will be stuck in impossible combination
 		with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
 			p = subprocess.Popen(["./TestEnvironment.x86_64", "--handle", "environment"], stdout=out, stderr=err)
 		
 		while p.poll() is None:
 			action = torch.randint(0, 2, (4,), dtype=torch.int, device='cpu')
-			self.mem.send("action", action)
+			self.mem.sendInt("action", action)
 			self.sem_act.post()
 			print("Sent action", action)
 
@@ -45,7 +46,7 @@ class TestGodotEnvironment(unittest.TestCase):
 			# time.sleep(0.1)
 			
 			self.sem_obs.wait()
-			observation = self.mem.receive("observation")
+			observation = self.mem.receiveFloat("observation")
 			print("Received observation", observation)
 		
 if __name__=='__main__':

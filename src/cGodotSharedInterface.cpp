@@ -16,7 +16,7 @@ cSharedMemoryTensor::~cSharedMemoryTensor(){
     delete segment_name;
 }
 
-void cSharedMemoryTensor::send(const std::string &name, torch::Tensor T){
+void cSharedMemoryTensor::sendInt(const std::string &name, torch::Tensor T){
     CHECK_CPU_INPUT_TYPE(T, torch::kInt);
     if(T.ndimension() != 1){
         ERROR("Number of dimensions should be 1");
@@ -36,17 +36,52 @@ void cSharedMemoryTensor::send(const std::string &name, torch::Tensor T){
     }
 }
 
-torch::Tensor cSharedMemoryTensor::receive(const std::string &name){
+void cSharedMemoryTensor::sendFloat(const std::string &name, torch::Tensor T){
+    CHECK_CPU_INPUT_TYPE(T, torch::kFloat);
+    if(T.ndimension() != 1){
+        ERROR("Number of dimensions should be 1");
+    }
+    if(segment->find<FloatVector>(name.c_str()).first){
+        ERROR("Variable already exists");
+    }
+    try{
+        const ShmemAllocator alloc_inst (segment->get_segment_manager());
+        FloatVector *myvector = segment->construct<FloatVector>(name.c_str())(alloc_inst);
+        myvector->resize(T.size(0));
+        myvector->assign(T.data<float>(), T.data<float>() + T.size(0));
+    }catch(interprocess_exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(std::exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }
+}
+
+torch::Tensor cSharedMemoryTensor::receiveInt(const std::string &name){
     torch::Tensor T;
     try{
         IntVector *myvector = segment->find<IntVector> (name.c_str()).first;
         T = torch::zeros(myvector->size(), torch::TensorOptions().dtype(torch::kInt).device(torch::kCPU));
-        
         for(int i=0; i<myvector->size(); i++){
             T[i] = (*myvector)[i];
         }
-
         segment->destroy<IntVector>(name.c_str());
+    }catch(interprocess_exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(std::exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }
+    return T;
+}
+
+torch::Tensor cSharedMemoryTensor::receiveFloat(const std::string &name){
+    torch::Tensor T;
+    try{
+        FloatVector *myvector = segment->find<FloatVector> (name.c_str()).first;
+        T = torch::zeros(myvector->size(), torch::TensorOptions().dtype(torch::kFloat).device(torch::kCPU));
+        for(int i=0; i<myvector->size(); i++){
+            T[i] = (*myvector)[i];
+        }
+        segment->destroy<FloatVector>(name.c_str());
     }catch(interprocess_exception &ex){
         std::cout<<ex.what()<<std::endl;
     }catch(std::exception &ex){
@@ -80,6 +115,7 @@ cSharedMemorySemaphore::~cSharedMemorySemaphore(){
 void cSharedMemorySemaphore::post(){
     // std::cout<<"Post semaphore "<<*name<<std::endl;
     try{
+        //Important: if the mutex is not cast here, it will give segfault
         mutex = static_cast<interprocess_semaphore*>(region->get_address());
         mutex->post();
     }catch(boost::interprocess::interprocess_exception &ex){
