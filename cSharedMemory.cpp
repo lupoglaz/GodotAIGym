@@ -34,10 +34,9 @@ cSharedMemory::~cSharedMemory(){
     delete segment_name;
 };
 
-PoolVector<int> cSharedMemory::getArray(const String &name){
+PoolVector<int> cSharedMemory::getIntArray(const String &name){
 	std::wstring ws = name.c_str();
 	std::string s_name( ws.begin(), ws.end() );
-
 	
 	PoolVector<int> data;
 	try{
@@ -50,16 +49,55 @@ PoolVector<int> cSharedMemory::getArray(const String &name){
         std::cout<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
-    }
+    }catch(const char *s){
+		std::cout<<s<<std::endl;
+	}
 	return data;
 }
 
-void cSharedMemory::sendArray(const String &name, const PoolVector<int> &array){
+PoolVector<float> cSharedMemory::getFloatArray(const String &name){
+	std::wstring ws = name.c_str();
+	std::string s_name( ws.begin(), ws.end() );
+	
+	PoolVector<float> data;
+	try{
+		FloatVector *shared_vector = segment->find<FloatVector> (s_name.c_str()).first;
+		for(int i=0; i<shared_vector->size(); i++){
+			data.push_back( (*shared_vector)[i] );
+		}
+		segment->destroy<FloatVector>(s_name.c_str());
+	}catch(interprocess_exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(std::exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(const char *s){
+		std::cout<<s<<std::endl;
+	}
+	return data;
+}
+
+void cSharedMemory::sendIntArray(const String &name, const PoolVector<int> &array){
 	std::wstring ws = name.c_str();
 	std::string s_name( ws.begin(), ws.end() );
 	try{
 		const ShmemAllocator alloc_inst (segment->get_segment_manager());
 		IntVector *shared_vector = segment->construct<IntVector>(s_name.c_str())(alloc_inst);
+		for(int i=0; i<array.size(); i++)
+			shared_vector->push_back(array[i]);
+
+	}catch(interprocess_exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }catch(std::exception &ex){
+        std::cout<<ex.what()<<std::endl;
+    }
+}
+
+void cSharedMemory::sendFloatArray(const String &name, const PoolVector<float> &array){
+	std::wstring ws = name.c_str();
+	std::string s_name( ws.begin(), ws.end() );
+	try{
+		const ShmemAllocator alloc_inst (segment->get_segment_manager());
+		FloatVector *shared_vector = segment->construct<FloatVector>(s_name.c_str())(alloc_inst);
 		for(int i=0; i<array.size(); i++)
 			shared_vector->push_back(array[i]);
 	}catch(interprocess_exception &ex){
@@ -70,8 +108,10 @@ void cSharedMemory::sendArray(const String &name, const PoolVector<int> &array){
 }
 
 void cSharedMemory::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("getArray", "str"), &cSharedMemory::getArray);
-	ClassDB::bind_method(D_METHOD("sendArray", "str", "array"), &cSharedMemory::sendArray);
+	ClassDB::bind_method(D_METHOD("getIntArray", "str"), &cSharedMemory::getIntArray);
+	ClassDB::bind_method(D_METHOD("getFloatArray", "str"), &cSharedMemory::getFloatArray);
+	ClassDB::bind_method(D_METHOD("sendIntArray", "str", "array"), &cSharedMemory::sendIntArray);
+	ClassDB::bind_method(D_METHOD("sendFloatArray", "str", "array"), &cSharedMemory::sendFloatArray);
 }
 
 void cSharedMemorySemaphore::_bind_methods() {

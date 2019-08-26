@@ -23,6 +23,11 @@ typedef std::vector<int, ShmemAllocator> IntVector;
 typedef std::vector<float, ShmemAllocator> FloatVector;
 
 
+struct TensorDescription{
+    std::string type;       //Tensor scalar type
+    TensorDescription(const std::string &t_type):type(t_type){}
+};
+
 class cSharedMemory : public Reference {
     GDCLASS(cSharedMemory, Reference);
 
@@ -38,8 +43,10 @@ public:
     cSharedMemory();
     ~cSharedMemory();
 
-    PoolVector<int> getArray(const String &name);
-    void sendArray(const String &name, const PoolVector<int> &array);
+    PoolVector<int> getIntArray(const String &name);
+    PoolVector<float> getFloatArray(const String &name);
+    void sendIntArray(const String &name, const PoolVector<int> &array);
+    void sendFloatArray(const String &name, const PoolVector<float> &array);
 };
 
 
