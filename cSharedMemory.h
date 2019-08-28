@@ -77,7 +77,7 @@ class cSharedMemorySemaphore : public Reference {
                 shared_memory_object object(open_only, name->c_str(), read_write);
                 region = new mapped_region(object, read_write);
             }catch(interprocess_exception &e){
-                std::cout<<boost::diagnostic_information(e)<<std::endl;
+                std::cout<<*name<<":"<<boost::diagnostic_information(e)<<std::endl;
                 shared_memory_object::remove(name->c_str());
             }
             // std::cout<<"Constructed semaphore "<<*name<<std::endl;

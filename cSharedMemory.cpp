@@ -46,7 +46,7 @@ PoolVector<int> cSharedMemory::getIntArray(const String &name){
 		}
 		segment->destroy<IntVector>(s_name.c_str());
 	}catch(interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<s_name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }catch(const char *s){
@@ -67,7 +67,7 @@ PoolVector<float> cSharedMemory::getFloatArray(const String &name){
 		}
 		segment->destroy<FloatVector>(s_name.c_str());
 	}catch(interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<s_name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }catch(const char *s){
@@ -86,7 +86,7 @@ void cSharedMemory::sendIntArray(const String &name, const PoolVector<int> &arra
 			shared_vector->push_back(array[i]);
 
 	}catch(interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<s_name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }
@@ -101,7 +101,7 @@ void cSharedMemory::sendFloatArray(const String &name, const PoolVector<float> &
 		for(int i=0; i<array.size(); i++)
 			shared_vector->push_back(array[i]);
 	}catch(interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<s_name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }
