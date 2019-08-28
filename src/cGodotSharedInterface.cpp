@@ -30,7 +30,7 @@ void cSharedMemoryTensor::sendInt(const std::string &name, torch::Tensor T){
         myvector->resize(T.size(0));
         myvector->assign(T.data<int>(), T.data<int>() + T.size(0));
     }catch(interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }
@@ -50,7 +50,7 @@ void cSharedMemoryTensor::sendFloat(const std::string &name, torch::Tensor T){
         myvector->resize(T.size(0));
         myvector->assign(T.data<float>(), T.data<float>() + T.size(0));
     }catch(interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }
@@ -66,7 +66,7 @@ torch::Tensor cSharedMemoryTensor::receiveInt(const std::string &name){
         }
         segment->destroy<IntVector>(name.c_str());
     }catch(interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }
@@ -83,7 +83,7 @@ torch::Tensor cSharedMemoryTensor::receiveFloat(const std::string &name){
         }
         segment->destroy<FloatVector>(name.c_str());
     }catch(interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }
@@ -99,7 +99,7 @@ cSharedMemorySemaphore::cSharedMemorySemaphore(const std::string &sem_name, int 
         void *addr = region->get_address();
         mutex = new (addr) interprocess_semaphore(init_count);
     }catch(interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<sem_name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }
@@ -119,7 +119,7 @@ void cSharedMemorySemaphore::post(){
         mutex = static_cast<interprocess_semaphore*>(region->get_address());
         mutex->post();
     }catch(boost::interprocess::interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<*name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }
@@ -131,7 +131,7 @@ void cSharedMemorySemaphore::wait(){
         mutex = static_cast<interprocess_semaphore*>(region->get_address());
         mutex->wait();
     }catch(boost::interprocess::interprocess_exception &ex){
-        std::cout<<ex.what()<<std::endl;
+        std::cout<<*name<<":"<<ex.what()<<std::endl;
     }catch(std::exception &ex){
         std::cout<<ex.what()<<std::endl;
     }
