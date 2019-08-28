@@ -1,35 +1,37 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://Environment.gd" type="Script" id=1]
 [ext_resource path="res://Cart.gd" type="Script" id=2]
 [ext_resource path="res://Pole.gd" type="Script" id=3]
 
-[sub_resource type="RectangleShape2D" id=6]
-extents = Vector2( 500, 5 )
-
-[sub_resource type="Gradient" id=7]
-offsets = PoolRealArray( 0.497006 )
-colors = PoolColorArray( 0.135183, 0.738281, 0.0490265, 1 )
-
-[sub_resource type="GradientTexture" id=8]
-gradient = SubResource( 7 )
-
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 50, 20 )
+extents = Vector2( 500, 5 )
 
 [sub_resource type="Gradient" id=2]
 offsets = PoolRealArray( 0.497006 )
-colors = PoolColorArray( 0.373936, 0.0640869, 0.585938, 1 )
+colors = PoolColorArray( 0.135183, 0.738281, 0.0490265, 1 )
 
 [sub_resource type="GradientTexture" id=3]
 gradient = SubResource( 2 )
-width = 100
 
 [sub_resource type="RectangleShape2D" id=4]
+extents = Vector2( 50, 20 )
+
+[sub_resource type="Gradient" id=5]
+offsets = PoolRealArray( 0.497006 )
+colors = PoolColorArray( 0.373936, 0.0640869, 0.585938, 1 )
+
+[sub_resource type="GradientTexture" id=6]
+gradient = SubResource( 5 )
+width = 100
+
+[sub_resource type="RectangleShape2D" id=7]
 extents = Vector2( 10, 100 )
 
-[sub_resource type="GradientTexture" id=5]
+[sub_resource type="GradientTexture" id=8]
 width = 100
+
+[sub_resource type="CircleShape2D" id=9]
 
 [node name="Environment" type="Node2D"]
 script = ExtResource( 1 )
@@ -40,10 +42,10 @@ collision_layer = 0
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Slider"]
-shape = SubResource( 6 )
+shape = SubResource( 1 )
 
 [node name="Sprite" type="Sprite" parent="Slider"]
-texture = SubResource( 8 )
+texture = SubResource( 3 )
 region_enabled = true
 region_rect = Rect2( 0, 0, 1000, 5 )
 
@@ -54,10 +56,10 @@ script = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Cart"]
 modulate = Color( 0, 0, 0, 1 )
-shape = SubResource( 1 )
+shape = SubResource( 4 )
 
 [node name="Sprite" type="Sprite" parent="Cart"]
-texture = SubResource( 3 )
+texture = SubResource( 6 )
 region_enabled = true
 region_rect = Rect2( 0, 0, 100, 50 )
 
@@ -68,12 +70,20 @@ script = ExtResource( 3 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Pole"]
 modulate = Color( 0, 0, 0, 1 )
-shape = SubResource( 4 )
+shape = SubResource( 7 )
 
 [node name="Sprite" type="Sprite" parent="Pole"]
-texture = SubResource( 5 )
+texture = SubResource( 8 )
 region_enabled = true
 region_rect = Rect2( 0, 0, 20, 200 )
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Pole"]
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pole/StaticBody2D"]
+position = Vector2( 0, -100 )
+shape = SubResource( 9 )
 
 [node name="Joint" type="PinJoint2D" parent="."]
 position = Vector2( 500, 400 )
@@ -87,3 +97,7 @@ node_a = NodePath("../Slider")
 node_b = NodePath("../Cart")
 length = 1000.0
 initial_offset = 500.0
+
+[node name="Label" type="Label" parent="."]
+margin_right = 40.0
+margin_bottom = 14.0

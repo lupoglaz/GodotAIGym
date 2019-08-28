@@ -11,7 +11,7 @@ func _ready():
 	init_transform = transform
 	init_velocity = linear_velocity
 	init_angular_velocity = angular_velocity
-	set_physics_process(true)
+	#set_physics_process(true)
 
 func _integrate_forces(state):
 	set_applied_force(force)
