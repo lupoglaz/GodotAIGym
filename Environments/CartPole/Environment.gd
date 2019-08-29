@@ -6,7 +6,7 @@ var observation = [0.0, 0.0, 0.0, 0.0]
 var agent_action = [0]
 var env_action = [0, 0]
 
-var force_mag = 200.0
+var force_mag = 500.0
 
 var sem_action
 var sem_observation
@@ -52,7 +52,6 @@ func _process(delta):
 		sem_action.wait()
 		agent_action = mem.getIntArray("agent_action")
 		env_action = mem.getIntArray("env_action")
-		print(env_action)
 	else:
 		if Input.is_action_pressed("ui_right"):
 			agent_action[0] = 1
@@ -72,10 +71,6 @@ func _process(delta):
 		$Pole.reset = true
 		env_action[0] = 0
 		agent_action[0] = 0
-	
-	if env_action[1] == 1:
-		print("Exit")
-		get_tree().quit()
 		
 	#act
 	#Engine.iterations_per_second = Engine.get_frames_per_second()

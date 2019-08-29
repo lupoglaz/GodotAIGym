@@ -10,6 +10,7 @@ import subprocess
 import torch
 import _GodotEnv
 import numpy as np
+import atexit
 
 class CartPoleEnv(gym.Env):
 	"""
@@ -44,14 +45,14 @@ class CartPoleEnv(gym.Env):
 		Considered solved when the average reward is greater than or equal to 195.0 over 100 consecutive trials.
 	"""
 
-	def __init__(self):
+	def __init__(self, exec_path="./CartPole.x86_64", env_path="CartPole.pck"):
 		self.mem = _GodotEnv.SharedMemoryTensor("environment")
 		self.sem_act = _GodotEnv.SharedMemorySemaphore("sem_action", 0)
 		self.sem_obs = _GodotEnv.SharedMemorySemaphore("sem_observation", 0)
 
 		#Important: if this process is called with subprocess.PIPE, the semaphores will be stuck in impossible combination
 		with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
-			p = subprocess.Popen(["./CartPole.x86_64", "--handle", "environment"], stdout=out, stderr=err)
+			self.process = subprocess.Popen([exec_path, "--handle", "environment", "--path", env_path], stdout=out, stderr=err)
 		
 		#Array to manipulate the state of the simulator
 		self.env_action = torch.zeros(2, dtype=torch.int, device='cpu')
@@ -61,59 +62,59 @@ class CartPoleEnv(gym.Env):
 		#Example of agent action (0/1)
 		self.agent_action = torch.zeros(1, dtype=torch.int, device='cpu')
 
+		atexit.register(self.close)
+
 	def seed(self, seed=None):
 		pass
 
 	def step(self, action):
-		print("Sending action")
-		action = torch.tensor([1], dtype=torch.int, device='cpu')
+		# print("Sending action")
+		action = torch.from_numpy(action).to(dtype=torch.int, device='cpu')
 		self.mem.sendInt("agent_action", action)
 		self.mem.sendInt("env_action", self.env_action)
 		self.sem_act.post()
-		print("Waiting for observation")
+		# print("Waiting for observation")
 		
 		self.sem_obs.wait()
-		print("Reading observation")
+		# print("Reading observation")
 		observation = self.mem.receiveFloat("observation")
 		reward = self.mem.receiveFloat("reward")
 		done = self.mem.receiveInt("done")
-		print("Read observation")
+		# print("Read observation")
 
-		return observation, reward, done.item(), None
+		return observation.numpy(), reward.item(), done.item(), None
 		
 	def reset(self):
-		print("Sending reset action")
+		# print("Sending reset action")
 		env_action = torch.tensor([1, 0], device='cpu', dtype=torch.int)
 		self.mem.sendInt("agent_action", self.agent_action)
 		self.mem.sendInt("env_action", env_action)
 		self.sem_act.post()
-		print("Sent reset action")
+		# print("Sent reset action")
 
 		self.sem_obs.wait()
-		print("Reading observation")
+		# print("Reading observation")
 		observation = self.mem.receiveFloat("observation")
 		reward = self.mem.receiveFloat("reward")
 		done = self.mem.receiveInt("done")
-		print("Read observation")
+		# print("Read observation")
+		return observation.numpy()
 		
 
 	def render(self, mode='human'):
 		pass
 
 	def close(self):
-		print("Sending exit action")
-		env_action = torch.tensor([0, 1], device='cpu', dtype=torch.int)
-		self.mem.sendInt("agent_action", self.agent_action)
-		self.mem.sendInt("env_action", env_action)
-		self.sem_act.post()
-		print("Sent exit action")
+		self.process.terminate()
+		print("Terminated")
+
 
 if __name__=='__main__':
 	env = CartPoleEnv()
 	for i in range(10):
 		done = 0
 		while done == 0:
-			s_prime, r, done, info = env.step(np.array([1]))
+			s_prime, r, done, info = env.step(np.array([0]))
 			print(s_prime, r, done)
 			if done == 1:
 				break
