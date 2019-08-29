@@ -19,6 +19,10 @@ config/name="CartPole"
 run/main_scene="res://Environment.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+Global="*res://Global.gd"
+
 [debug]
 
 settings/stdout/print_fps=true
@@ -26,7 +30,6 @@ settings/stdout/print_fps=true
 [display]
 
 window/size/resizable=false
-window/size/borderless=true
 window/vsync/use_vsync=false
 
 [rendering]

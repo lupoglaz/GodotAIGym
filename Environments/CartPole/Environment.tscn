@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://Environment.gd" type="Script" id=1]
 [ext_resource path="res://Cart.gd" type="Script" id=2]
@@ -30,8 +30,6 @@ extents = Vector2( 10, 100 )
 
 [sub_resource type="GradientTexture" id=8]
 width = 100
-
-[sub_resource type="CircleShape2D" id=9]
 
 [node name="Environment" type="Node2D"]
 script = ExtResource( 1 )
@@ -76,14 +74,6 @@ shape = SubResource( 7 )
 texture = SubResource( 8 )
 region_enabled = true
 region_rect = Rect2( 0, 0, 20, 200 )
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Pole"]
-collision_layer = 0
-collision_mask = 0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Pole/StaticBody2D"]
-position = Vector2( 0, -100 )
-shape = SubResource( 9 )
 
 [node name="Joint" type="PinJoint2D" parent="."]
 position = Vector2( 500, 400 )

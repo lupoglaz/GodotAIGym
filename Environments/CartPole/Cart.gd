@@ -14,10 +14,11 @@ func _ready():
 	#set_physics_process(true)
 
 func _integrate_forces(state):
-	set_applied_force(force)
-	
 	if reset:
-		state.transform = init_transform
+		state.set_transform(init_transform)
 		state.linear_velocity = init_velocity
 		state.angular_velocity = init_angular_velocity
+		force = Vector2(0.0, 0.0)
 		reset=false
+	
+	set_applied_force(force)

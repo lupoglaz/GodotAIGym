@@ -65,42 +65,57 @@ class CartPoleEnv(gym.Env):
 		pass
 
 	def step(self, action):
+		print("Sending action")
 		action = torch.tensor([1], dtype=torch.int, device='cpu')
 		self.mem.sendInt("agent_action", action)
 		self.mem.sendInt("env_action", self.env_action)
 		self.sem_act.post()
+		print("Waiting for observation")
 		
 		self.sem_obs.wait()
+		print("Reading observation")
 		observation = self.mem.receiveFloat("observation")
 		reward = self.mem.receiveFloat("reward")
 		done = self.mem.receiveInt("done")
+		print("Read observation")
 
 		return observation, reward, done.item(), None
 		
 	def reset(self):
+		print("Sending reset action")
 		env_action = torch.tensor([1, 0], device='cpu', dtype=torch.int)
 		self.mem.sendInt("agent_action", self.agent_action)
 		self.mem.sendInt("env_action", env_action)
 		self.sem_act.post()
+		print("Sent reset action")
+
+		self.sem_obs.wait()
+		print("Reading observation")
+		observation = self.mem.receiveFloat("observation")
+		reward = self.mem.receiveFloat("reward")
+		done = self.mem.receiveInt("done")
+		print("Read observation")
 		
 
 	def render(self, mode='human'):
 		pass
 
 	def close(self):
+		print("Sending exit action")
 		env_action = torch.tensor([0, 1], device='cpu', dtype=torch.int)
 		self.mem.sendInt("agent_action", self.agent_action)
 		self.mem.sendInt("env_action", env_action)
 		self.sem_act.post()
+		print("Sent exit action")
 
 if __name__=='__main__':
 	env = CartPoleEnv()
 	for i in range(10):
-		done = False
-		# s = env.reset()
-		while not done:
-			for t in range(100):
-				s_prime, r, done, info = env.step(np.array([1]))
-				if done:
-					break
+		done = 0
+		while done == 0:
+			s_prime, r, done, info = env.step(np.array([1]))
+			print(s_prime, r, done)
+			if done == 1:
+				break
+		env.reset()
 	env.close()
