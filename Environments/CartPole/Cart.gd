@@ -6,6 +6,7 @@ var init_velocity
 var init_angular_velocity
 var force = Vector2()
 var init_joint_position
+var add_shift = 0
 
 func _ready():
 	init_transform = transform
@@ -18,6 +19,7 @@ func _integrate_forces(state):
 		state.set_transform(init_transform)
 		state.linear_velocity = init_velocity
 		state.angular_velocity = init_angular_velocity
+		state.transform.origin.x += add_shift
 		force = Vector2(0.0, 0.0)
 		reset=false
 	

@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.distributions import Categorical
 from Environments.CartPole import CartPoleEnv
 import numpy as np
+import time
 #Hyperparameters
 learning_rate = 0.0002
 gamma         = 0.98
@@ -65,7 +66,7 @@ class ActorCritic(nn.Module):
 		self.optimizer.step()         
 	  
 def main():  
-	# env = gym.make('CartPole-v1')
+	#env = gym.make('CartPole-v1')
 	env = CartPoleEnv(exec_path="Environments/CartPole.x86_64", env_path="Environments/CartPole.pck")
 	model = ActorCritic()    
 	n_rollout = 5
@@ -80,12 +81,12 @@ def main():
 				prob = model.pi(torch.from_numpy(s).float())
 				m = Categorical(prob)
 				a = m.sample().item()
-				s_prime, r, done, info = env.step(np.array([a]))
+				s_prime, r, done, info = env.step(a)
 				model.put_data((s,a,r,s_prime,done))
 				
 				s = s_prime
 				score += r
-				
+				env.render()
 				if done:
 					break                     
 			
