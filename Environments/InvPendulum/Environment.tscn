@@ -1,0 +1,50 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Environment.gd" type="Script" id=1]
+[ext_resource path="res://RigidBody2D.gd" type="Script" id=2]
+
+[sub_resource type="CircleShape2D" id=1]
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 10, 100 )
+
+[sub_resource type="Gradient" id=3]
+offsets = PoolRealArray( 0.347305 )
+colors = PoolColorArray( 0.996094, 0, 0, 1 )
+
+[sub_resource type="GradientTexture" id=4]
+gradient = SubResource( 3 )
+width = 20
+
+[node name="Environment" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="Anchor" type="StaticBody2D" parent="."]
+position = Vector2( 525, 305 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Anchor"]
+shape = SubResource( 1 )
+disabled = true
+
+[node name="PinJoint2D" type="PinJoint2D" parent="Anchor"]
+node_a = NodePath("..")
+node_b = NodePath("RigidBody2D")
+
+[node name="RigidBody2D" type="RigidBody2D" parent="Anchor/PinJoint2D"]
+position = Vector2( 0, 98 )
+script = ExtResource( 2 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Anchor/PinJoint2D/RigidBody2D"]
+shape = SubResource( 2 )
+
+[node name="Position2D" type="Position2D" parent="Anchor/PinJoint2D/RigidBody2D/CollisionShape2D"]
+position = Vector2( -1, 100 )
+
+[node name="Sprite" type="Sprite" parent="Anchor/PinJoint2D/RigidBody2D"]
+texture = SubResource( 4 )
+region_enabled = true
+region_rect = Rect2( 0, 0, 20, 200 )
+
+[node name="Timer" type="Timer" parent="."]
+process_mode = 0
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
