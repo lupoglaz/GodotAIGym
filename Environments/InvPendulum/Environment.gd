@@ -1,6 +1,5 @@
 extends Node2D
 
-var observation = [0.0, 0.0, 0.0, 0.0]
 var agent_action = [0, 0]
 var env_action = [0, 0]
 
@@ -28,6 +27,7 @@ func _ready():
 	var v = $Anchor/PinJoint2D/RigidBody2D.transform.get_origin()
 	var AnchorT = $Anchor.transform
 	var JointT = $Anchor/PinJoint2D.transform
+	$Anchor/PinJoint2D/RigidBody2D.init_anchor = AnchorT.xform(JointT.get_origin())
 	$Anchor/PinJoint2D/RigidBody2D.init_origin = AnchorT.xform(JointT.xform(v))
 	$Anchor/PinJoint2D/RigidBody2D.init_rotation = 0.0
 	$Anchor/PinJoint2D/RigidBody2D.init_angular_velocity = 0.0
@@ -40,20 +40,16 @@ func is_done():
 		return 1
 	return 0
 	
-func get_reward(observation):
-	return -observation[3]/200.0
-	
 func _physics_process(delta):
 	
 	if timeout:
 		Engine.iterations_per_second = max(60, Engine.get_frames_per_second())
-		Engine.time_scale = max(1.0, Engine.iterations_per_second/60.0)
+		Engine.time_scale = max(1.0, Engine.iterations_per_second/100.0)
 		
 		if Global.release:
 			sem_action.wait()
 			agent_action = mem.getIntArray("agent_action")
 			env_action = mem.getIntArray("env_action")
-			print(agent_action, env_action)
 		else:
 			agent_action[0] = 0
 			agent_action[1] = 0
@@ -67,6 +63,8 @@ func _physics_process(delta):
 				env_action[0] = 1
 			if Input.is_key_pressed(KEY_ESCAPE):
 				env_action[1] = 1
+		
+		$ActionLabel.text = "Action: "+str(agent_action)
 		
 		if env_action[0] == 1:
 			$Anchor/PinJoint2D/RigidBody2D.reset = true
@@ -82,18 +80,21 @@ func _physics_process(delta):
 		elif agent_action[1] == 1:
 			$Anchor/PinJoint2D/RigidBody2D.torque = -torque_mag
 		
-		$Timer.start(deltat*60.0/Engine.iterations_per_second)
+		$Timer.start(deltat)
 		timeout = false
 
 func _on_Timer_timeout():
 	if Global.release:
-		observation = $Anchor/PinJoint2D/RigidBody2D.get_observation()
+		var observation = $Anchor/PinJoint2D/RigidBody2D.get_observation()
+		var reward = [$Anchor/PinJoint2D/RigidBody2D.get_reward()]
 		mem.sendFloatArray("observation", observation)
-		mem.sendFloatArray("reward", [get_reward(observation)*time_elapsed])
+		mem.sendFloatArray("reward", reward)
 		mem.sendIntArray("done", [is_done()])
 		sem_observation.post()
+		$ObservationLabel.text = "Observation: "+str(observation)
+		$RewardLabel.text = "Reward: "+str(reward)
 	else:
-		observation = $Anchor/PinJoint2D/RigidBody2D.get_observation()
+		var observation = $Anchor/PinJoint2D/RigidBody2D.get_observation()
 		
 	time_elapsed += deltat
 	timeout = true

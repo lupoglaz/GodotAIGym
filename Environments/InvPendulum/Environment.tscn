@@ -47,4 +47,23 @@ region_rect = Rect2( 0, 0, 20, 200 )
 
 [node name="Timer" type="Timer" parent="."]
 process_mode = 0
+
+[node name="ObservationLabel" type="Label" parent="."]
+margin_left = 1.0
+margin_top = 23.0
+margin_right = 41.0
+margin_bottom = 37.0
+text = "Observation:"
+
+[node name="ActionLabel" type="Label" parent="."]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Action:"
+
+[node name="RewardLabel" type="Label" parent="."]
+margin_left = 1.0
+margin_top = 46.0
+margin_right = 41.0
+margin_bottom = 60.0
+text = "Reward: "
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

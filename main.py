@@ -11,12 +11,14 @@ import time
 learning_rate = 0.0002
 gamma         = 0.98
 
+from matplotlib import pylab as plt
+
 class ActorCritic(nn.Module):
 	def __init__(self):
 		super(ActorCritic, self).__init__()
 		self.data = []
 		
-		self.fc1 = nn.Linear(4,256)
+		self.fc1 = nn.Linear(3,256)
 		self.fc_pi = nn.Linear(256,4)
 		self.fc_v = nn.Linear(256,2)
 		self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
@@ -24,7 +26,7 @@ class ActorCritic(nn.Module):
 	def pi(self, x):
 		x = F.relu(self.fc1(x))
 		x = self.fc_pi(x)
-		x = x.view(-1, 2, 2).squeeze()
+		x = x.view(-1, 2, 2)
 		
 		prob = F.softmax(x, dim=(x.ndimension()-1))
 		return prob
@@ -62,30 +64,34 @@ class ActorCritic(nn.Module):
 		td_target = r + gamma * self.v(s_prime) * done
 		delta = td_target - self.v(s)
 
-		if s.ndimension() == 2:
-			return
-
 		pi = self.pi(s)
 		pi_a = pi.gather(2, a.unsqueeze(dim=2)).squeeze()
 		loss = -torch.log(pi_a) * delta.detach() + F.smooth_l1_loss(self.v(s), td_target.detach())
+		L = loss.mean()
 
 		self.optimizer.zero_grad()
-		loss.mean().backward()
-		self.optimizer.step()         
-	  
+		L.backward()
+		self.optimizer.step()       
+		return L.item()
+
+
 def main():  
 	env = InvPendulumEnv(exec_path="Environments/InvPendulum.x86_64", env_path="Environments/InvPendulum.pck")
-	model = ActorCritic()    
-	n_rollout = 10
-	print_interval = 40
+	model = ActorCritic().train()
+	n_rollout = 5
+	print_interval = 20
 	score = 0.0
 
-	for n_epi in range(10000):
+	av_rewards = []
+	std_rewards = []
+	rewards = []
+	for n_epi in range(5000):
 		done = False
 		s = env.reset()
+		reward = 0.0
 		while not done:
 			for t in range(n_rollout):
-				prob = model.pi(s)
+				prob = model.pi(s).squeeze()
 				m = Categorical(prob)
 				a = m.sample().to(dtype=torch.int, device='cpu')
 				s_prime, r, done, info = env.step(a)
@@ -93,16 +99,27 @@ def main():
 				
 				s = s_prime
 				score += r
-				env.render()
+				reward += r
 				if done:
-					break                     
+					break
 			
-			model.train_net()
-			
+			L = model.train_net()
+		
+		rewards.append(reward)
+
 		if n_epi%print_interval==0 and n_epi!=0:
 			print("# of episode :{}, avg score : {:.1f}".format(n_epi, score/print_interval))
 			score = 0.0
+			av_rewards.append(np.average(rewards))
+			std_rewards.append(np.std(rewards))
+			rewards = []
 	env.close()
+
+	fig = plt.figure()
+	plt.errorbar([i for i in range(len(av_rewards))], av_rewards, std_rewards)
+	plt.show()
+
+
 
 if __name__ == '__main__':
 	main()
