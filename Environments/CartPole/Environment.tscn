@@ -49,7 +49,7 @@ region_rect = Rect2( 0, 0, 1000, 5 )
 
 [node name="Cart" type="RigidBody2D" parent="."]
 position = Vector2( 500, 400 )
-mass = 5.0
+mass = 0.2
 script = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Cart"]
@@ -61,8 +61,21 @@ texture = SubResource( 6 )
 region_enabled = true
 region_rect = Rect2( 0, 0, 100, 50 )
 
+[node name="CPUParticles2D" type="CPUParticles2D" parent="Cart"]
+position = Vector2( -50.0992, -0.307312 )
+rotation = 1.5708
+spread = 43.18
+scale_amount = 5.0
+
+[node name="CPUParticles2D2" type="CPUParticles2D" parent="Cart"]
+position = Vector2( 49.1771, 0.307434 )
+rotation = -1.5708
+spread = 43.18
+scale_amount = 5.0
+
 [node name="Pole" type="RigidBody2D" parent="."]
 position = Vector2( 500, 300 )
+mass = 0.5
 can_sleep = false
 script = ExtResource( 3 )
 

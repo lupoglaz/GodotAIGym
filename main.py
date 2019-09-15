@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.distributions import Categorical
 from Environments.InvPendulum import InvPendulumEnv
 import numpy as np
+import time
 #Hyperparameters
 learning_rate = 0.0002
 gamma         = 0.98
@@ -92,7 +93,7 @@ def main():
 				
 				s = s_prime
 				score += r
-				
+				env.render()
 				if done:
 					break                     
 			

@@ -69,7 +69,7 @@ class CartPoleEnv(gym.Env):
 
 	def step(self, action):
 		# print("Sending action")
-		action = torch.from_numpy(action).to(dtype=torch.int, device='cpu')
+		action = torch.tensor([action], dtype=torch.int, device='cpu')
 		self.mem.sendInt("agent_action", action)
 		self.mem.sendInt("env_action", self.env_action)
 		self.sem_act.post()
@@ -78,7 +78,7 @@ class CartPoleEnv(gym.Env):
 		self.sem_obs.wait()
 		# print("Reading observation")
 		observation = self.mem.receiveFloat("observation")
-		reward = self.mem.receiveFloat("reward")
+		reward = self.mem.receiveFloat("reward")/10.0
 		done = self.mem.receiveInt("done")
 		# print("Read observation")
 
