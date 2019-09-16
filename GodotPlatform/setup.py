@@ -47,7 +47,7 @@ if __name__=='__main__':
 				)
 
 	install_templates(	username="lupoglaz", 
-						version="3.2.dev",
+						version="3.1.alpha",
 						template_name="godot_shared.x11_shared.opt.64",
 						godot_bin_dir="/home/lupoglaz/Projects/godot/bin")
 
