@@ -20,8 +20,12 @@ This script does several things:
 
 ## Examples
 There are several example environments in the directory **Environments**:
-1. **InvPendulum** shows the example of environment that relies heavily on the physics engine
-2. **DodgeTheCreeps** an example of the environment that uses screen capture
+**InvPendulum** shows the example of environment that relies heavily on the physics engine
 
-## Tutorials
+## Tutorial
 See (docs)
+
+# TODO
+1. **Models deployment**: add module to load your traced model into godot engine
+2. **Learning from pixels**: passing godot viewport rendering as a torch tensor
+3. **Complete tutorial**: tutorial about complete workflow, from empty godot project to training to deployment
