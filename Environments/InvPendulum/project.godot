@@ -19,10 +19,6 @@ config/name="InvPendulum"
 run/main_scene="res://Environment.tscn"
 config/icon="res://icon.png"
 
-[autoload]
-
-Global="*res://Global.gd"
-
 [display]
 
 window/vsync/use_vsync=false

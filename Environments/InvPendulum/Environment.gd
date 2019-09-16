@@ -16,13 +16,14 @@ var deltat = 0.1
 var time_elapsed = 0.0
 
 func _ready():
-	if Global.release:
+	if OS.get_name()=='X11_SHARED':
 		sem_action = cSharedMemorySemaphore.new()
 		sem_observation = cSharedMemorySemaphore.new()
 		sem_reset = cSharedMemorySemaphore.new()
 		mem = cSharedMemory.new()
 		sem_action.init("sem_action")
 		sem_observation.init("sem_observation")
+		print("Running as OpenAIGym environment")
 	
 	var v = $Anchor/PinJoint2D/RigidBody2D.transform.get_origin()
 	var AnchorT = $Anchor.transform
@@ -46,7 +47,7 @@ func _physics_process(delta):
 		Engine.iterations_per_second = max(60, Engine.get_frames_per_second())
 		Engine.time_scale = max(1.0, Engine.iterations_per_second/100.0)
 		
-		if Global.release:
+		if OS.get_name()=='X11_SHARED':
 			sem_action.wait()
 			agent_action = mem.getIntArray("agent_action")
 			env_action = mem.getIntArray("env_action")
@@ -84,17 +85,15 @@ func _physics_process(delta):
 		timeout = false
 
 func _on_Timer_timeout():
-	if Global.release:
-		var observation = $Anchor/PinJoint2D/RigidBody2D.get_observation()
-		var reward = [$Anchor/PinJoint2D/RigidBody2D.get_reward()]
+	var observation = $Anchor/PinJoint2D/RigidBody2D.get_observation()
+	var reward = [$Anchor/PinJoint2D/RigidBody2D.get_reward()]
+	$ObservationLabel.text = "Observation: "+str(observation)
+	$RewardLabel.text = "Reward: "+str(reward)
+	if OS.get_name()=='X11_SHARED':	
 		mem.sendFloatArray("observation", observation)
 		mem.sendFloatArray("reward", reward)
 		mem.sendIntArray("done", [is_done()])
 		sem_observation.post()
-		$ObservationLabel.text = "Observation: "+str(observation)
-		$RewardLabel.text = "Reward: "+str(reward)
-	else:
-		var observation = $Anchor/PinJoint2D/RigidBody2D.get_observation()
-		
+	
 	time_elapsed += deltat
 	timeout = true

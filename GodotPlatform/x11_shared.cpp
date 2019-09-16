@@ -2575,7 +2575,7 @@ String X11_shared::get_clipboard() const {
 
 String X11_shared::get_name() {
 
-	return "X11";
+	return "X11_SHARED";
 }
 
 Error X11_shared::shell_open(String p_uri) {
