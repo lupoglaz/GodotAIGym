@@ -5,7 +5,6 @@ from shutil import copyfile, copytree, rmtree
 
 GODOT_PATH = "/home/lupoglaz/Projects/godot"
 
-
 def patch_script(filename, patched_line):
 	lines = []
 	modified = False
