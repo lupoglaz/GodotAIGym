@@ -14,12 +14,15 @@
 
     <!-- Custom styles for this template -->
     <link href="css/tmp.css" rel="stylesheet">
+
+    <script src="js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
   </head>
 
   <body>
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="#">GoTo</a>
+      <a class="navbar-brand" href="https://github.com/lupoglaz/GodotGymAI">GitHub</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -27,23 +30,132 @@
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="https://github.com/lupoglaz/GodotGymAI">Github<span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="#API">API<span class="sr-only">(current)</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="https://devpost.com/software/godotaigym">PytorchHackaton</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#">???</a>
+            <a class="nav-link" href="#Tutorial">Tutorial</a>
           </li>
         </ul>
       </div>
     </nav>
+    
+<main role="main" class="container-fluid">
 
-    <main role="main" class="container">
+        <div class="starter-template">
+            <h1>Godot Gym AI</h1>
+            <p class="lead">Make your Godot project into OpenAI Gym environment to train RL models with PyTorch.</p>
+        </div>
+        <div class="starter-template">
+            <h1>Tutorial</h1>
+        </div>
+        <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                <h2>Introduction</h2>
+                When training reinforcement learning agents, the agent interacts with the environment by sending actions and receiving observations.
+                The agents are trained in the python script and the environment is implemented using Godot. <br>
+                In python the environment is wrapped into a class, that is usually similar to OpenAI Gym environment class (Code 1). We need to implement 
+                the functions: <b>init</b>, <b>step</b>, <b>reset</b> and <b>close</b> to get fully functional environment. <br><br>
+                The <b>init</b> function launches subprocesses associated with your environment. In our case it launches Godot 
+                project as a subprocess.<br><br>
+                The <b>step</b> function takes an action tensor that was sampled from your model and passes it to the environment. It then computes 
+                the next state and returns the observation of this state along with the reward. The variable <b>done</b> is <b>true</b> if the new state is the 
+                final one, <b>true</b> otherwise.<br><br>
+                The <b>reset</b> function returns the environment to the initial state and return the observation of this state.<br><br>
+                The <b>close</b> function closes any subprocesses associated with your environment.<br><br>
+                We will ignore <b>seed</b> and <b>render</b> functions for now, because we use random number generator in Godot 
+                and rendering is done by default.<br><br>
+            </div>
+            <div class="col">
+                <h5>Code 1: Dummy implementation of OpenAI Gym class.</h5>
+                <pre class="pre"><code class="python">
+class DummyEnv(gym.Env):
+    def __init__(self):
+        pass
 
-      <div class="starter-template">
-        <h1>Godot Gym AI</h1>
-        <p class="lead">Make your Godot project into OpenAI Gym environment to train RL models with PyTorch.</p>
+    def seed(self, seed=None):
+        pass
+
+    def step(self, action):
+        return observation, reward, done, info
+        
+    def reset(self):
+        return observation
+        
+    def render(self, mode='human'):
+        pass
+
+    def close(self):
+        pass
+                </code></pre>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                The training cycle for a reinforcement learning agent looks something like this (Code 2):<br>
+                we collect samples until we observed <b>n_rollout</b> states, these observations along with actions and rewards
+                are collected in the batch.<br>
+                Then the model does one gradient step, empties its batch and resumes simulation. During the simulation, all the actions are 
+                sampled from the model itself.
+            </div>
+            <div class="col">
+                <h5>Code 2: Dummy code for training an agent.</h5>
+                <pre class="pre"><code class="python">
+env = DummyEnv()
+for i in range(num_epochs):
+    done = 0
+    while done == 0:
+        for t in range(n_rollout):
+            a = model.sample()
+            s_prime, r, done, info = env.step(a)
+            model.put_data((s, a, r, s_prime, done))
+		    s = s_prime
+            if done:
+                break
+        model.train_net()
+    env.reset()
+env.close()
+                </code></pre>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <h5>Figure1: Synchronization diagram between python script and the environment.</h5>
+                <img src="Fig/Process.png" class="rounded mx-auto d-block float-center" alt="Training process" width=80%>
+            </div>
+            <div class="col">
+                
+            </div>
+            <div class="col">
+                <h5>Code 3: Introducing semaphores.</h5>
+                <pre class="pre"><code class="python">
+class DummyEnvSemaphores(gym.Env):
+    def __init__(self):
+        pass
+
+    def seed(self, seed=None):
+        pass
+
+    def step(self, action):
+        return observation, reward, done, info
+        
+    def reset(self):
+        return observation
+        
+    def render(self, mode='human'):
+        pass
+
+    def close(self):
+        pass
+                </code></pre>
+            </div>
+        </div>
+
       </div>
 
 
