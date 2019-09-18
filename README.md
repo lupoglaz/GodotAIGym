@@ -1,4 +1,6 @@
 # GodotGymAI
+![logo](docs/Fig/GodotGymLogo.png)
+
 
 Make your Godot project into OpenAI Gym environment to train RL models with PyTorch. This project only runs on Linux systems.
 
@@ -20,10 +22,13 @@ This script does several things:
 
 ## Examples
 There are several example environments in the directory **Environments**:
+
 **InvPendulum** shows the example of environment that relies heavily on the physics engine
 
-## Tutorial
-See (docs)
+## Tutorial and API
+[Tutorial](https://lupoglaz.github.io/GodotGymAI/tutorial.html)
+
+[API](https://lupoglaz.github.io/GodotGymAI/API.html)
 
 # TODO
 1. **Models deployment**: add module to load your traced model into godot engine
