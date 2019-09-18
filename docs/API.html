@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <title>Godot AI Gym</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://getbootstrap.com/docs/4.1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/tmp.css" rel="stylesheet">
+    <script src="js/scripts.js"></script>
+
+    <script src="js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand" href="https://github.com/lupoglaz/GodotGymAI">GitHub</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="index.html">Home<span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="API.html">API<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item active">
+            <a class="nav-link" href="tutorial.html">Tutorial<span class="sr-only"></span></a>
+            </li>
+        </ul>
+        </div>
+    </nav>
+    
+<main role="main" class="container-fluid">
+    <div class="starter-template">
+        <h1>API</h1>
+    </div>
+    <div class="starter-template">
+        <h1>Sending and receiving arrays</h1>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <h1>Python</h1>
+            </div>
+            <div class="col">
+                <h1>Godot</h1>
+            </div>
+            <div class="col">
+                <h1>Description</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col" id="SharedMemoryTensor">
+                <script>createHeader("SharedMemoryTensor", "class", "_GodotEnv", "SharedMemoryTensor", "(handle)");</script>
+                Class to manage sending and receiving tensors in shared memory. Handle is a string, that uniquely identifies the 
+                memory.
+                
+                <script>createHeader("SharedMemoryTensor", "function", "SharedMemoryTensor", "sendInt", "(name, tensor)");</script>
+                Sends 1d <b>tensor</b> with the id <b>name</b> to the shared memory.
+                <script>
+                    generate_table("SharedMemoryTensor", 
+                                    [
+                                        ["name", "CPU", "string", ""], 
+                                        ["tensor", "CPU", "int32", "ndim = 1"]
+                                    ],
+                                    [
+                                        ["None", "CPU", "", ""], 
+                                    ]
+                                    );
+                </script>
+
+                <script>createHeader("SharedMemoryTensor", "function", "SharedMemoryTensor", "receiveInt", "(name, tensor)");</script>
+                Retrieves 1d <b>tensor</b> with the id  <b>name</b> from the shared memory.
+                <script>
+                    generate_table("SharedMemoryTensor", 
+                                    [
+                                        ["name", "CPU", "string", ""], 
+                                    ],
+                                    [
+                                        ["tensor", "CPU", "int32", "ndim = 1"]
+                                    ]
+                                    );
+                </script>
+
+                <script>createHeader("SharedMemoryTensor", "function", "SharedMemoryTensor", "sendFloat", "(name, tensor)");</script>
+                Sends 1d <b>tensor</b> with the id <b>name</b> to the shared memory.
+                <script>
+                    generate_table("SharedMemoryTensor", 
+                                    [
+                                        ["name", "CPU", "string", ""], 
+                                        ["tensor", "CPU", "float32", "ndim = 1"]
+                                    ],
+                                    [
+                                        ["None", "CPU", "", ""], 
+                                    ]
+                                    );
+                </script>
+
+                <script>createHeader("SharedMemoryTensor", "function", "SharedMemoryTensor", "receiveFloat", "(name, tensor)");</script>
+                Retrieves 1d <b>tensor</b> with the id  <b>name</b> from the shared memory.
+                <script>
+                    generate_table("SharedMemoryTensor", 
+                                    [
+                                        ["name", "CPU", "string", ""], 
+                                    ],
+                                    [
+                                        ["tensor", "CPU", "float32", "ndim = 1"]
+                                    ]
+                                    );
+                </script>
+            </div>
+            <div class="col" id="cSharedMemory">
+                <script>createHeader("cSharedMemory", "class", "", "cSharedMemory", "");</script>
+                Class to manage sending and receiving tensors in shared memory. Reads the memory handle from the argument <b>--handle</b>, 
+                with which the environment was called.
+                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "sendIntArray", "(name, array)");</script>
+                Sends 1d <b>array</b> with the id  <b>name</b> to the shared memory.
+                <script>
+                    generate_table("cSharedMemory", 
+                                    [
+                                        ["name", "CPU", "String", ""], 
+                                        ["Array", "CPU", "Int", "ndim = 1"]
+                                    ],
+                                    [
+                                        ["None","","",""]
+                                    ]
+                                    );
+                </script>
+                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "getIntArray", "(name, array)");</script>
+                Receives 1d <b>array</b> with the id  <b>name</b> from the shared memory.
+                <script>
+                    generate_table("cSharedMemory", 
+                                    [
+                                        ["name", "CPU", "String", ""], 
+                                    ],
+                                    [
+                                        ["Array", "CPU", "Int", "ndim = 1"]
+                                    ]
+                                    );
+                </script>
+
+                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "sendFloatArray", "(name, array)");</script>
+                Sends 1d <b>array</b> with the id  <b>name</b> to the shared memory.
+                <script>
+                    generate_table("cSharedMemory", 
+                                    [
+                                        ["name", "CPU", "String", ""], 
+                                        ["Array", "CPU", "Float", "ndim = 1"]
+                                    ],
+                                    [
+                                        ["None","","",""]
+                                    ]
+                                    );
+                </script>
+                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "getFloatArray", "(name, array)");</script>
+                Receives 1d <b>array</b> with the id  <b>name</b> from the shared memory.
+                <script>
+                    generate_table("cSharedMemory", 
+                                    [
+                                        ["name", "CPU", "String", ""], 
+                                    ],
+                                    [
+                                        ["Array", "CPU", "Float", "ndim = 1"]
+                                    ]
+                                    );
+                </script>
+            </div>
+            <div class="col">
+                These classes manage the sending and receiving Arrays or tensors in the shared memory. When 
+                the funciton receive is called the shared variable that was read is deallocated. 
+                On the other hand when the send functions are called the new variables with the corresponding ids 
+                are allocated in the shared memory.<br><br>
+                Godot classes get their shered memory handle from the command line arguments and assume that the 
+                chunk of the shared memory with such handle is already allocated by the caller process.<br>
+                On the other hand, when python class is constructed it automatically allocates the shared memory chunk 
+                with the handle.
+            </div>
+        </div>
+        <div class="starter-template">
+            <h1>Semaphores</h1>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h1>Python</h1>
+            </div>
+            <div class="col">
+                <h1>Godot</h1>
+            </div>
+            <div class="col">
+                <h1>Description</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col" id="SharedMemorySemaphore">
+            <script>createHeader("SharedMemorySemaphore", "class", "_GodotEnv", "SharedMemorySemaphore", "(name, init_val)");</script>
+            Creates a semaphore <b>name</b> in the shared memory with initial count <b>init_val</b>.
+            
+            <script>createHeader("SharedMemorySemaphore", "function", "SharedMemorySemaphore", "post", "()");</script>
+            Increases semaphore value by 1.
+
+            <script>createHeader("SharedMemorySemaphore", "function", "SharedMemorySemaphore", "wait", "()");</script>
+            Decreases semaphore value by 1. If the value is less or equal to zeros, blocks the process until the value increases.
+            </div>
+            
+            <div class="col" id="cSharedMemorySemaphore">
+            <script>createHeader("cSharedMemorySemaphore", "class", "", "cSharedMemorySemaphore", "");</script>
+                        
+            <script>createHeader("cSharedMemorySemaphore", "function", "cSharedMemorySemaphore", "init", "(name)");</script>
+            Initializes the semaphore id to <b>name</b>. Assumes that such semaphore already exists in the shared memory.
+
+            <script>createHeader("cSharedMemorySemaphore", "function", "cSharedMemorySemaphore", "post", "()");</script>
+            Increases semaphore value by 1.
+
+            <script>createHeader("cSharedMemorySemaphore", "function", "cSharedMemorySemaphore", "wait", "()");</script>
+            Decreases semaphore value by 1. If the value is less or equal to zeros, blocks the process until the value increases.
+
+            </div>
+            <div class="col">
+                These classes manage the semaphores in the shared memory. Godot classes assume that the semaphores are already
+                created. Meanwhile python classes create them on initialization.
+            </div>
+        </div>
+    </div><!-- /.container -->
+</main>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="https://getbootstrap.com/docs/4.1/assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="https://getbootstrap.com/docs/4.1/assets/js/vendor/popper.min.js"></script>
+<script src="https://getbootstrap.com/docs/4.1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
