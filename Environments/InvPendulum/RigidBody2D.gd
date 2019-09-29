@@ -35,4 +35,4 @@ func get_observation():
 	
 func get_reward():
 	var th = fmod((transform.get_rotation() + PI), (2*PI)) - PI
-	return (th*th + .1*angular_velocity*angular_velocity)
+	return (th*th + .1*angular_velocity*angular_velocity + 0.001*(torque/200.0)*(torque/200.0))

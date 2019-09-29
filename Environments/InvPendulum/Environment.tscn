@@ -32,13 +32,11 @@ node_b = NodePath("RigidBody2D")
 
 [node name="RigidBody2D" type="RigidBody2D" parent="Anchor/PinJoint2D"]
 position = Vector2( 0, 98 )
+mass = 0.01
 script = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Anchor/PinJoint2D/RigidBody2D"]
 shape = SubResource( 2 )
-
-[node name="Position2D" type="Position2D" parent="Anchor/PinJoint2D/RigidBody2D/CollisionShape2D"]
-position = Vector2( -1, 100 )
 
 [node name="Sprite" type="Sprite" parent="Anchor/PinJoint2D/RigidBody2D"]
 texture = SubResource( 4 )
@@ -66,4 +64,11 @@ margin_top = 46.0
 margin_right = 41.0
 margin_bottom = 60.0
 text = "Reward: "
+
+[node name="TimeLabel" type="Label" parent="."]
+margin_left = 2.0
+margin_top = 66.0
+margin_right = 42.0
+margin_bottom = 80.0
+text = "Time:"
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

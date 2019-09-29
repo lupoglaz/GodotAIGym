@@ -23,6 +23,10 @@ config/icon="res://icon.png"
 
 window/vsync/use_vsync=false
 
+[physics]
+
+2d/default_gravity=100
+
 [rendering]
 
 quality/driver/driver_name="GLES2"
