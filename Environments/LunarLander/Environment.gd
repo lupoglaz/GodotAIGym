@@ -5,6 +5,8 @@ var time_elapsed = 0.0
 var timeout = true
 var deltat = 0.01
 
+var status_in_landing = false
+
 func _ready():
 	set_physics_process(true)
 
@@ -51,15 +53,3 @@ func _process(delta):
 func _on_Timer_timeout():
 	time_elapsed += deltat
 	timeout = true
-
-
-func _on_Lander_body_shape_entered(body_id, body, body_shape, local_shape):
-	pass # Replace with function body.
-
-
-func _on_LandingArea_body_entered(body):
-	pass # Replace with function body.
-
-
-func _on_Ground_body_entered(body):
-	pass # Replace with function body.

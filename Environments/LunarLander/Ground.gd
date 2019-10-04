@@ -1,4 +1,4 @@
-extends StaticBody2D
+extends RigidBody2D
 
 func generate_ground(num_vert, height=150.0 ):
 	var polygon = PoolVector2Array()
