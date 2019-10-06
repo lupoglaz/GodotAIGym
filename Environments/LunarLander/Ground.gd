@@ -1,5 +1,7 @@
 extends RigidBody2D
 
+var area_center
+
 func generate_ground(num_vert, height=150.0 ):
 	var polygon = PoolVector2Array()
 	var platf_width = 100.0
@@ -41,5 +43,5 @@ func _ready():
 	$CollisionPolygon2D.set_polygon(ground)
 	$Polygon2D.set_polygon(ground)
 	$LandingArea.transform.origin = Vector2(0, -height)
+	area_center = transform.basis_xform($LandingArea.transform.origin)
 	
-	pass # Replace with function body.

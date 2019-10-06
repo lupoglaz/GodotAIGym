@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://Environment.gd" type="Script" id=1]
 [ext_resource path="res://Lander.gd" type="Script" id=2]
@@ -21,6 +21,10 @@ colors = PoolColorArray( 0.867767, 0.917969, 0, 1, 1, 0, 0, 1 )
 
 [sub_resource type="CapsuleShape2D" id=5]
 radius = 5.0
+
+[sub_resource type="CapsuleShape2D" id=7]
+radius = 5.30426
+height = 17.7217
 
 [sub_resource type="RectangleShape2D" id=6]
 extents = Vector2( 50, 10 )
@@ -101,17 +105,21 @@ position = Vector2( 33.5414, 29.2183 )
 rotation = -0.349066
 shape = SubResource( 5 )
 
-[node name="Line2D2" type="Line2D" parent="Lander/RightLegShape"]
+[node name="LeftLegShape" type="CollisionShape2D" parent="Lander"]
+position = Vector2( -32.6775, 29.3801 )
+rotation = 0.349066
+shape = SubResource( 7 )
+
+[node name="Line2D2" type="Line2D" parent="Lander"]
+position = Vector2( 33.5414, 29.2183 )
+rotation = -0.349066
 points = PoolVector2Array( 0, 14, 0, -14 )
 default_color = Color( 0, 0.164706, 1, 1 )
 texture_mode = -1111170616
 
-[node name="LeftLegShape" type="CollisionShape2D" parent="Lander"]
+[node name="Line2D" type="Line2D" parent="Lander"]
 position = Vector2( -32.6775, 29.3801 )
 rotation = 0.349066
-shape = SubResource( 5 )
-
-[node name="Line2D" type="Line2D" parent="Lander/LeftLegShape"]
 points = PoolVector2Array( 0, 14, 0, -14 )
 default_color = Color( 0, 0.164706, 1, 1 )
 texture_mode = -1111170616
@@ -145,5 +153,18 @@ texture = ExtResource( 4 )
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 0.01
+
+[node name="RewardLabel" type="Label" parent="."]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Reward:"
+
+[node name="StateLabel" type="Label" parent="."]
+margin_left = 0.598724
+margin_top = 17.3633
+margin_right = 40.5987
+margin_bottom = 31.3633
+text = "State:"
 [connection signal="body_entered" from="Ground/LandingArea" to="." method="_on_LandingArea_body_entered"]
+[connection signal="body_exited" from="Ground/LandingArea" to="." method="_on_LandingArea_body_exited"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
