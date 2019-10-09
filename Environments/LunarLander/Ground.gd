@@ -2,6 +2,8 @@ extends RigidBody2D
 
 var area_center
 
+var LANDING_HEIGHT = 150.0
+
 func generate_ground(num_vert, height=150.0 ):
 	var polygon = PoolVector2Array()
 	var platf_width = 100.0
@@ -37,11 +39,24 @@ func generate_ground(num_vert, height=150.0 ):
 	polygon.append(Vector2(-shift_x, 0.0))
 	return polygon
 
-func _ready():
-	var height = 150.0
-	var ground = generate_ground(10, height)
-	$CollisionPolygon2D.set_polygon(ground)
+func create_ground():
+	shape_owner_clear_shapes(0)
+	var ground = generate_ground(10, LANDING_HEIGHT)
+	var shape = ConcavePolygonShape2D.new()
+	shape.set_segments(ground)
+	shape_owner_add_shape(0, shape)
+	
 	$Polygon2D.set_polygon(ground)
-	$LandingArea.transform.origin = Vector2(0, -height)
-	area_center = transform.basis_xform($LandingArea.transform.origin)
+	$Polygon2D.set_color(Color(0,0,0))
+	$LandingArea.transform.origin = Vector2(0, -LANDING_HEIGHT)
+	area_center = transform.xform($LandingArea.transform.origin)
+
+func _ready():
+	
+	for owner_id in get_shape_owners():
+		for shape_id in shape_owner_get_shape_count(owner_id):
+			var shape = shape_owner_get_shape(owner_id, shape_id)
+			print(owner_id, shape_id, shape)
+			
+	create_ground()
 	

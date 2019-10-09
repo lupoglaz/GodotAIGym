@@ -1,6 +1,5 @@
 extends Node2D
-var agent_action = [0.0, 0.0]
-var env_action = [0, 0]
+
 var time_elapsed = 0.0
 var timeout = true
 var deltat = 0.01
@@ -10,31 +9,51 @@ var in_landing_area = false
 var prev_shaping
 var FPS = 60.0
 
+var sem_action
+var sem_observation
+var mem
+
 func _ready():
+	if OS.get_name()=='X11_SHARED':
+		sem_action = cSharedMemorySemaphore.new()
+		sem_observation = cSharedMemorySemaphore.new()
+		mem = cSharedMemory.new()
+		sem_action.init("sem_action")
+		sem_observation.init("sem_observation")
+		print("Running as OpenAIGym environment")
+		
 	set_physics_process(true)
 
-
-func _process(delta):
-	if timeout:
-		agent_action[0] = 0.0
-		agent_action[1] = 0.0
+func read_actions():
+	var agent_action = [0.0, 0.0]
+	var env_action = [0, 0]
+	if OS.get_name()=='X11_SHARED':
+		sem_action.wait()
+		agent_action = mem.getFloatArray("agent_action")
+		env_action = mem.getIntArray("env_action")
+	else:
 		if Input.is_key_pressed(KEY_SPACE):
 			agent_action[0] = 1.0
 		if Input.is_key_pressed(KEY_A):
 			agent_action[1] = 1.0
 		if Input.is_key_pressed(KEY_D):
 			agent_action[1] = -1.0
-		env_action[0] = 0
-		env_action[1] = 0
 		if Input.is_key_pressed(KEY_ENTER):
 			env_action[0] = 1
 		if Input.is_key_pressed(KEY_ESCAPE):
 			env_action[1] = 1
 			
-			
+	return [agent_action, env_action]
+
+func _process(delta):
+	if timeout:
+		var actions = read_actions()
+		var agent_action = actions[0]
+		var env_action = actions[1]
+		
 		if env_action[0] == 1:
 			$Lander.reset = true
-			$Ground.reset = true
+			$Ground.create_ground()
 			time_elapsed = 0.0
 			
 		if env_action[1] == 1:
@@ -87,7 +106,7 @@ func _on_Timer_timeout():
 		reward = shaping - prev_shaping
 	prev_shaping = shaping
 	
-	if $Lander.body_collided or abs(state[0])>1.0 or abs(state[1])>1.0:
+	if $Lander.body_collided or abs(state[0])>1.0 or abs(state[1])>1.5:
 		reward -= 100.0
 		done = true
 	if $Lander/MainEngine.emitting:
@@ -100,6 +119,12 @@ func _on_Timer_timeout():
 		
 	$RewardLabel.text = "Reward:"+str(reward)
 	$StateLabel.text = "State:"+str(state)
+	
+	if OS.get_name()=='X11_SHARED':
+		mem.sendFloatArray("observation", state)
+		mem.sendFloatArray("reward", [reward])
+		mem.sendIntArray("done", [int(done)])
+		sem_observation.post()
 	
 
 func _on_LandingArea_body_entered(body):

@@ -25,6 +25,9 @@ var vel_y
 var angular_vel
 var angle
 
+var reset = false
+var init_transform
+
 func _ready():
 	
 	#Getting shapes local indexes
@@ -33,7 +36,6 @@ func _ready():
 	$LeftLegShape.get_shape().set_meta("name", "left_leg")
 	$BodyShape.get_shape().set_meta("name", "body")
 	for owner_id in shape_owners:
-		print("Owner:",owner_id, "Num shapes:", shape_owner_get_shape_count(owner_id))
 		for shape_id in shape_owner_get_shape_count(owner_id):
 			var shape = shape_owner_get_shape(owner_id, shape_id)
 			if shape.get_meta("name") == "right_leg":
@@ -42,10 +44,21 @@ func _ready():
 				left_leg_idx = shape_owner_get_shape_index(owner_id, shape_id)
 			if shape.get_meta("name") == "body":
 				body_idx = shape_owner_get_shape_index(owner_id, shape_id)
-	
+				
+	init_transform = transform
+		
 func _integrate_forces(state):
-	
+	if reset:
+		var new_transform = init_transform
+		new_transform.rotated(rand_range(-0.2, 0.2))
+		new_transform.translated(Vector2(rand_range(-300.0, 300.0), 0.0))
+		state.set_transform(init_transform)
+		state.set_linear_velocity(Vector2(0.0, 0.0))
+		state.set_angular_velocity(0.0)
+		reset = false
+		
 	var glob = state.get_transform()
+		
 	if $MainEngine.emitting:
 		var force = glob.basis_xform(Vector2(0.0, -MAIN_ENGINE_MAG))
 		var offset = glob.basis_xform(Vector2(0, 25))

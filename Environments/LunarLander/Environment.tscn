@@ -130,6 +130,7 @@ mode = 1
 script = ExtResource( 3 )
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Ground"]
+visible = false
 modulate = Color( 0.47451, 0, 0, 1 )
 self_modulate = Color( 0.654902, 0.0235294, 0.0235294, 1 )
 polygon = PoolVector2Array( 1, 0.295532, -508, 3.29553, -510, -154.704, -373, -106.704, -203, -170.704, -86, -127.704, 80, -127.704, 179, -190.704, 250, -91.7045, 330, -95.7045, 350, -152.704, 455, -185.704, 515, -127.704, 516, 1.29553 )
