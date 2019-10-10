@@ -22,11 +22,11 @@ colors = PoolColorArray( 0.867767, 0.917969, 0, 1, 1, 0, 0, 1 )
 [sub_resource type="CapsuleShape2D" id=5]
 radius = 5.0
 
-[sub_resource type="CapsuleShape2D" id=7]
+[sub_resource type="CapsuleShape2D" id=6]
 radius = 5.30426
 height = 17.7217
 
-[sub_resource type="RectangleShape2D" id=6]
+[sub_resource type="RectangleShape2D" id=7]
 extents = Vector2( 50, 10 )
 
 [node name="Environment" type="Node2D"]
@@ -108,7 +108,7 @@ shape = SubResource( 5 )
 [node name="LeftLegShape" type="CollisionShape2D" parent="Lander"]
 position = Vector2( -32.6775, 29.3801 )
 rotation = 0.349066
-shape = SubResource( 7 )
+shape = SubResource( 6 )
 
 [node name="Line2D2" type="Line2D" parent="Lander"]
 position = Vector2( 33.5414, 29.2183 )
@@ -142,7 +142,7 @@ color = Color( 0, 0, 0, 1 )
 position = Vector2( 0, -200 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ground/LandingArea"]
-shape = SubResource( 6 )
+shape = SubResource( 7 )
 
 [node name="FlagLeft" type="Sprite" parent="Ground/LandingArea"]
 position = Vector2( -40, -15 )

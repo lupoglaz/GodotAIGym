@@ -9,7 +9,8 @@ import torch
 import gym
 import numpy as np
 from PPO import PPO
-from Memory import Memory 
+from Memory import Memory
+from LunarLander import LunarLanderEnv
 
 import argparse
 
@@ -34,7 +35,10 @@ if __name__=='__main__':
 	betas = (0.9, 0.999)
 		
 	# creating environment
-	env = gym.make(args.environment)
+	# env = gym.make(args.environment)
+	GODOT_BIN_PATH = "LunarLander/LunarLander.x86_64"
+	env_abs_path = "LunarLander/LunarLander.pck"
+	env = LunarLanderEnv(exec_path=GODOT_BIN_PATH, env_path=env_abs_path)
 	state_dim = env.observation_space.shape[0]
 	action_dim = env.action_space.shape[0]
 	
@@ -56,7 +60,8 @@ if __name__=='__main__':
 		for t in range(args.max_timesteps):
 			time_step +=1
 			# Running policy_old:
-			action = ppo.select_action(state, memory).cpu().data.numpy().flatten()
+			# action = ppo.select_action(state, memory).cpu().data.numpy().flatten()
+			action = ppo.select_action(state, memory).cpu().flatten()
 			state, reward, done, _ = env.step(action)
 			
 			#Training
@@ -77,7 +82,7 @@ if __name__=='__main__':
 			running_reward += reward
 			if done:
 				break
-		
+				
 		avg_length += t
 		
 		# stop training if avg_reward > solved_reward

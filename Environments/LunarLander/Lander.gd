@@ -50,9 +50,9 @@ func _ready():
 func _integrate_forces(state):
 	if reset:
 		var new_transform = init_transform
-		new_transform.rotated(rand_range(-0.2, 0.2))
-		new_transform.translated(Vector2(rand_range(-300.0, 300.0), 0.0))
-		state.set_transform(init_transform)
+		new_transform = new_transform.rotated(rand_range(-0.2, 0.2))
+		new_transform = new_transform.translated(Vector2(rand_range(-300.0, 300.0), 0.0))
+		state.set_transform(new_transform)
 		state.set_linear_velocity(Vector2(0.0, 0.0))
 		state.set_angular_velocity(0.0)
 		reset = false

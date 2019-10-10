@@ -42,7 +42,8 @@ func read_actions():
 			env_action[0] = 1
 		if Input.is_key_pressed(KEY_ESCAPE):
 			env_action[1] = 1
-			
+	print(env_action)
+	print(agent_action)	
 	return [agent_action, env_action]
 
 func _process(delta):
@@ -55,6 +56,7 @@ func _process(delta):
 			$Lander.reset = true
 			$Ground.create_ground()
 			time_elapsed = 0.0
+			env_action[0] == 0
 			
 		if env_action[1] == 1:
 			get_tree().quit()

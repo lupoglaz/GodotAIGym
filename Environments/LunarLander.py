@@ -59,9 +59,9 @@ class LunarLanderEnv(gym.Env):
 		self.env_action[1] = 0	#1 = exit
 
 		#Example of agent action
-		self.agent_action = torch.zeros(1, dtype=torch.float, device='cpu')
+		self.agent_action = torch.zeros(2, dtype=torch.float, device='cpu')
 		
-		high = np.array([1., 1., 1., 1., 1., 1., 1.])
+		high = np.array([1., 1., 1., 1., 1., 1., 1., 1.])
 		self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
 		self.observation_space = spaces.Box(low=-high, high=high, dtype=np.float32)
 
@@ -108,11 +108,13 @@ if __name__=='__main__':
 	env_abs_path = "LunarLander/LunarLander.pck"
 	env = LunarLanderEnv(exec_path=GODOT_BIN_PATH, env_path=env_abs_path)
 	for i in range(10):
+		obs = env.reset()
+		print(obs)
 		done = 0
 		while done == 0:
 			s_prime, r, done, info = env.step(torch.zeros(2, dtype=torch.float, device='cpu'))
 			print(s_prime, r, done)
 			if done == 1:
 				break
-		env.reset()
+		
 	env.close()
