@@ -3,7 +3,7 @@ import sys
 import argparse
 from shutil import copyfile, copytree, rmtree
 
-GODOT_PATH = "/home/lupoglaz/Projects/godot"
+GODOT_PATH = os.environ["GODOT_PATH"]
 
 def patch_script(filename, patched_line):
 	lines = []

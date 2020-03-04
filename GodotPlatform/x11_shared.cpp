@@ -2041,15 +2041,11 @@ void X11_shared::process_xevents() {
 			case LeaveNotify: {
 				if (main_loop && !mouse_mode_grab)
 					main_loop->notification(MainLoop::NOTIFICATION_WM_MOUSE_EXIT);
-				if (input)
-					input->set_mouse_in_window(false);
 
 			} break;
 			case EnterNotify: {
 				if (main_loop && !mouse_mode_grab)
 					main_loop->notification(MainLoop::NOTIFICATION_WM_MOUSE_ENTER);
-				if (input)
-					input->set_mouse_in_window(true);
 			} break;
 			case FocusIn:
 				minimized = false;

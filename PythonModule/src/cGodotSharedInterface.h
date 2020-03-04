@@ -9,9 +9,10 @@
 
 using namespace boost::interprocess;
 
-typedef allocator<int, managed_shared_memory::segment_manager>  ShmemAllocator;
-typedef std::vector<int, ShmemAllocator> IntVector;
-typedef std::vector<float, ShmemAllocator> FloatVector;
+typedef allocator<int, managed_shared_memory::segment_manager>  ShmemAllocatorInt;
+typedef allocator<float, managed_shared_memory::segment_manager>  ShmemAllocatorFloat;
+typedef std::vector<int, ShmemAllocatorInt> IntVector;
+typedef std::vector<float, ShmemAllocatorFloat> FloatVector;
 
 struct TensorDescription{
     std::string type;       //Tensor scalar type

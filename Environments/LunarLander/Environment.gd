@@ -42,11 +42,15 @@ func read_actions():
 			env_action[0] = 1
 		if Input.is_key_pressed(KEY_ESCAPE):
 			env_action[1] = 1
-	print(env_action)
-	print(agent_action)	
+	#print(env_action)
+	#print(agent_action)	
 	return [agent_action, env_action]
 
 func _process(delta):
+	# Fix sleeping problem with lander
+	# Sometimes it stops moving
+	if $Lander.sleeping:
+		$Lander.sleeping = false
 	if timeout:
 		var actions = read_actions()
 		var agent_action = actions[0]
@@ -60,7 +64,6 @@ func _process(delta):
 			
 		if env_action[1] == 1:
 			get_tree().quit()
-		
 		$Lander/MainEngine.emitting = false
 		$Lander/LeftEngine.emitting = false
 		$Lander/RightEngine.emitting = false
@@ -115,7 +118,7 @@ func _on_Timer_timeout():
 		reward -= 0.3
 	if $Lander/LeftEngine.emitting or $Lander/RightEngine.emitting: 
 		reward -= 0.03
-	if $Lander.rest:
+	if $Lander.reached_goal:
 		reward += 100.0
 		done = true
 		
@@ -127,6 +130,8 @@ func _on_Timer_timeout():
 		mem.sendFloatArray("reward", [reward])
 		mem.sendIntArray("done", [int(done)])
 		sem_observation.post()
+		
+		
 	
 
 func _on_LandingArea_body_entered(body):

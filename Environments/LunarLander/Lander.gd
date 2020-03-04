@@ -15,7 +15,7 @@ var left_engine_power = 1.0
 var right_engine_power = 1.0
 var main_engine_power = 1.0
 
-var rest = false
+var reached_goal = false
 
 #lander state
 var pos_x
@@ -27,6 +27,7 @@ var angle
 
 var reset = false
 var init_transform
+
 
 func _ready():
 	
@@ -56,9 +57,9 @@ func _integrate_forces(state):
 		state.set_linear_velocity(Vector2(0.0, 0.0))
 		state.set_angular_velocity(0.0)
 		reset = false
-		
+	
 	var glob = state.get_transform()
-		
+	
 	if $MainEngine.emitting:
 		var force = glob.basis_xform(Vector2(0.0, -MAIN_ENGINE_MAG))
 		var offset = glob.basis_xform(Vector2(0, 25))
@@ -74,6 +75,7 @@ func _integrate_forces(state):
 		var offset = glob.basis_xform(Vector2(25, -25))
 		apply_impulse(offset, right_engine_power*force)
 		
+	
 	#Getting colliding shapes indexes
 	right_leg_collided = false
 	left_leg_collided = false
@@ -94,7 +96,9 @@ func _integrate_forces(state):
 	angular_vel = state.get_angular_velocity()
 	angle = glob.get_rotation()
 	
-	if state.get_linear_velocity().length()<1.0 and state.get_angular_velocity()<0.01:
-		rest = true
+	
+	if left_leg_collided and right_leg_collided and get_parent().in_landing_area:
+		reached_goal = true
 	else:
-		rest = false
+		reached_goal = false
+		

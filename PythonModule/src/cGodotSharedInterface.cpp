@@ -25,7 +25,7 @@ void cSharedMemoryTensor::sendInt(const std::string &name, torch::Tensor T){
         ERROR("Variable already exists");
     }
     try{
-        const ShmemAllocator alloc_inst (segment->get_segment_manager());
+        const ShmemAllocatorInt alloc_inst (segment->get_segment_manager());
         IntVector *myvector = segment->construct<IntVector>(name.c_str())(alloc_inst);
         myvector->resize(T.size(0));
         myvector->assign(T.data<int>(), T.data<int>() + T.size(0));
@@ -45,7 +45,7 @@ void cSharedMemoryTensor::sendFloat(const std::string &name, torch::Tensor T){
         ERROR("Variable already exists");
     }
     try{
-        const ShmemAllocator alloc_inst (segment->get_segment_manager());
+        const ShmemAllocatorFloat alloc_inst (segment->get_segment_manager());
         FloatVector *myvector = segment->construct<FloatVector>(name.c_str())(alloc_inst);
         myvector->resize(T.size(0));
         myvector->assign(T.data<float>(), T.data<float>() + T.size(0));
