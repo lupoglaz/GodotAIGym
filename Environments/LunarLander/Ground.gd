@@ -78,4 +78,4 @@ func _draw():
 	var poly = $Polygon2D.get_polygon()
 	for i in range(1 , poly.size()):
 		draw_line(poly[i-1] , poly[i], OutLine , Width)
-	$Polygon2D.draw_line(poly[poly.size() - 1] , poly[0], OutLine , Width)
+	#$Polygon2D.draw_line(poly[poly.size() - 1] , poly[0], OutLine , Width)
