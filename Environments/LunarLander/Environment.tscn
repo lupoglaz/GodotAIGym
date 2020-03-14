@@ -57,7 +57,6 @@ local_coords = false
 emission_shape = 2
 emission_rect_extents = Vector2( 1, 10 )
 spread = 10.0
-flatness = 0.12
 gravity = Vector2( 0, 9.8 )
 initial_velocity = 100.0
 initial_velocity_random = 0.1

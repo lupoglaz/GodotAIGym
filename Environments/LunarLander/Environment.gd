@@ -14,20 +14,22 @@ var sem_observation
 var mem
 
 func _ready():
-	if OS.get_name()=='X11_SHARED':
+	#if OS.get_name()=='X11_SHARED':
+	if true:
 		sem_action = cSharedMemorySemaphore.new()
 		sem_observation = cSharedMemorySemaphore.new()
 		mem = cSharedMemory.new()
 		sem_action.init("sem_action")
 		sem_observation.init("sem_observation")
 		print("Running as OpenAIGym environment")
-		
+	
 	set_physics_process(true)
 
 func read_actions():
 	var agent_action = [0.0, 0.0]
 	var env_action = [0, 0]
-	if OS.get_name()=='X11_SHARED':
+	#if OS.get_name()=='X11_SHARED':
+	if true:
 		sem_action.wait()
 		agent_action = mem.getFloatArray("agent_action")
 		env_action = mem.getIntArray("env_action")
@@ -43,7 +45,7 @@ func read_actions():
 		if Input.is_key_pressed(KEY_ESCAPE):
 			env_action[1] = 1
 	#print(env_action)
-	#print(agent_action)	
+	#print(agent_action)
 	return [agent_action, env_action]
 
 func _process(delta):
@@ -125,7 +127,8 @@ func _on_Timer_timeout():
 	$RewardLabel.text = "Reward:"+str(reward)
 	$StateLabel.text = "State:"+str(state)
 	
-	if OS.get_name()=='X11_SHARED':
+	#if OS.get_name()=='X11_SHARED':
+	if true:
 		mem.sendFloatArray("observation", state)
 		mem.sendFloatArray("reward", [reward])
 		mem.sendIntArray("done", [int(done)])

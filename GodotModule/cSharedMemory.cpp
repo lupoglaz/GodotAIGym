@@ -9,7 +9,8 @@
 #include <cstddef>
 #include <cassert>
 #include <utility>
-#include <platform/x11_shared/x11_shared.h>
+#include <platform/x11/os_x11.h>
+// #include <platform/x11_shared/x11_shared.h>
 
 using namespace boost::interprocess;
 
@@ -17,9 +18,10 @@ typedef std::string MyType;
 
 cSharedMemory::cSharedMemory(){
 	//Obtain segment_name value
-	X11_shared *os = reinterpret_cast<X11_shared*>(OS::get_singleton());
-	segment_name = new std::string(os->get_shared_handle().str());
-		
+	OS_X11 *os = reinterpret_cast<OS_X11*>(OS::get_singleton());
+	long pid = os->get_process_id();
+	segment_name = new std::string(std::to_string(pid));
+	std::cout<<"Segment name:"<<segment_name<<std::endl;
 	try{
 		segment = new managed_shared_memory(open_only, segment_name->c_str());
 	}catch (boost::interprocess::interprocess_exception &e){

@@ -18,7 +18,7 @@ if __name__=='__main__':
 	parser = argparse.ArgumentParser(description='PPO+Godot')	
 	parser.add_argument('-environment', default='LunarLanderContinuous-v2', help='Environment name')
 	parser.add_argument('-test', default=None, help='Test only', type=str)
-	parser.add_argument('-solved_reward', default=100.0, help='Reward, when the problem is solved', type=float)
+	parser.add_argument('-solved_reward', default=300.0, help='Reward, when the problem is solved', type=float)
 	parser.add_argument('-log_interval', default=20, help='Log interval', type=int)
 	parser.add_argument('-max_episodes', default=10000, help='Maximum number of episodes', type=int)
 	parser.add_argument('-max_timesteps', default=500, help='Maximum number of timesteps in an episode', type=int)

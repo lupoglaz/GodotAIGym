@@ -45,14 +45,17 @@ class LunarLanderEnv(gym.Env):
 	"""
 
 	def __init__(self, exec_path, env_path):
-		self.mem = _GodotEnv.SharedMemoryTensor("environment")
+		
 		self.sem_act = _GodotEnv.SharedMemorySemaphore("sem_action", 0)
 		self.sem_obs = _GodotEnv.SharedMemorySemaphore("sem_observation", 0)
 
 		#Important: if this process is called with subprocess.PIPE, the semaphores will be stuck in impossible combination
 		with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
-			self.process = subprocess.Popen([exec_path, "--handle", "environment", "--path", os.path.abspath(env_path)], stdout=out, stderr=err)
+			# self.process = subprocess.Popen([exec_path, "--handle", "environment", "--path", os.path.abspath(env_path)], stdout=out, stderr=err)
+			self.process = subprocess.Popen([exec_path, "--path", os.path.abspath(env_path)], stdout=out, stderr=err)
 		
+		self.mem = _GodotEnv.SharedMemoryTensor('%d'%self.process.pid)
+
 		#Array to manipulate the state of the simulator
 		self.env_action = torch.zeros(2, dtype=torch.int, device='cpu')
 		self.env_action[0] = 0	#1 = reset
@@ -112,7 +115,7 @@ if __name__=='__main__':
 		print(obs)
 		done = 0
 		while done == 0:
-			s_prime, r, done, info = env.step(torch.zeros(2, dtype=torch.float, device='cpu'))
+			s_prime, r, done, info = env.step(torch.randn(2, dtype=torch.float, device='cpu'))
 			print(s_prime, r, done)
 			if done == 1:
 				break
