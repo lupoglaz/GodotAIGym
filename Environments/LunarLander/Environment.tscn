@@ -165,6 +165,15 @@ margin_top = 17.3633
 margin_right = 40.5987
 margin_bottom = 31.3633
 text = "State:"
+
+[node name="CmdLine" type="Label" parent="."]
+margin_left = 1.0
+margin_top = 38.0
+margin_right = 63.0
+margin_bottom = 103.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="body_entered" from="Ground/LandingArea" to="." method="_on_LandingArea_body_entered"]
 [connection signal="body_exited" from="Ground/LandingArea" to="." method="_on_LandingArea_body_exited"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

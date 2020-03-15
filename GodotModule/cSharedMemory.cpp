@@ -19,15 +19,33 @@ typedef std::string MyType;
 cSharedMemory::cSharedMemory(){
 	//Obtain segment_name value
 	OS_X11 *os = reinterpret_cast<OS_X11*>(OS::get_singleton());
-	long pid = os->get_process_id();
-	segment_name = new std::string(std::to_string(pid));
-	std::cout<<"Segment name:"<<segment_name<<std::endl;
+	// long pid = os->get_process_id();
+	// segment_name = new std::string(std::to_string(pid));
+	// List<String> args = os->get_cmdline_args();
+	print_line(String("Hello world"));
+	found = false;
+	std::wstring arg_s;
+	for(List<String>::Element *E=os->get_cmdline_args().front(); E; E=E->next()) {
+		print_line(E->get());
+		arg_s = E->get().c_str();
+		std::string arg_s_name( arg_s.begin(), arg_s.end() );
+		if(arg_s_name.compare(std::string("--handle"))==0){
+			arg_s = E->next()->get().c_str();
+			std::string val_s( arg_s.begin(), arg_s.end() );
+			segment_name = new std::string(val_s);
+			found = true;
+		}
+	}
+	
+	if(!found)return;
+	
 	try{
 		segment = new managed_shared_memory(open_only, segment_name->c_str());
 	}catch (boost::interprocess::interprocess_exception &e){
 		std::cout<<boost::diagnostic_information(e)<<std::endl;
 		shared_memory_object::remove(segment_name->c_str());
 	}
+	
 };
 
 cSharedMemory::~cSharedMemory(){
@@ -35,6 +53,10 @@ cSharedMemory::~cSharedMemory(){
     delete segment;
     delete segment_name;
 };
+
+bool cSharedMemory::exists(){
+	return found;
+}
 
 PoolVector<int> cSharedMemory::getIntArray(const String &name){
 	std::wstring ws = name.c_str();
@@ -114,6 +136,7 @@ void cSharedMemory::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("getFloatArray", "str"), &cSharedMemory::getFloatArray);
 	ClassDB::bind_method(D_METHOD("sendIntArray", "str", "array"), &cSharedMemory::sendIntArray);
 	ClassDB::bind_method(D_METHOD("sendFloatArray", "str", "array"), &cSharedMemory::sendFloatArray);
+	ClassDB::bind_method(D_METHOD("exists"), &cSharedMemory::exists);
 }
 
 void cSharedMemorySemaphore::_bind_methods() {

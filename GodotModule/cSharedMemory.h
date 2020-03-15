@@ -36,6 +36,8 @@ private:
     managed_shared_memory *segment = NULL;
     shared_memory_object *object = NULL;
 
+    bool found;
+
 protected:
     static void _bind_methods();
 
@@ -47,6 +49,7 @@ public:
     PoolVector<float> getFloatArray(const String &name);
     void sendIntArray(const String &name, const PoolVector<int> &array);
     void sendFloatArray(const String &name, const PoolVector<float> &array);
+    bool exists();
 };
 
 
