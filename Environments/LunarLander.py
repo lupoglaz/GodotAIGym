@@ -53,7 +53,6 @@ class LunarLanderEnv(gym.Env):
 		
 		#Important: if this process is called with subprocess.PIPE, the semaphores will be stuck in impossible combination
 		with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
-			# self.process = subprocess.Popen([exec_path, "--handle", "environment", "--path", os.path.abspath(env_path)], stdout=out, stderr=err)
 			self.process = subprocess.Popen([exec_path, "--path", os.path.abspath(env_path), "--handle", self.handle], stdout=out, stderr=err)
 				
 

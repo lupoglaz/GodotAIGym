@@ -14,11 +14,12 @@ var deltat = 0.05
 var time_elapsed = 0.0
 
 func _ready():
-	if OS.get_name()=='X11_SHARED':
+	mem = cSharedMemory.new()
+	if mem.exists():
 		sem_action = cSharedMemorySemaphore.new()
 		sem_observation = cSharedMemorySemaphore.new()
 		sem_reset = cSharedMemorySemaphore.new()
-		mem = cSharedMemory.new()
+		
 		sem_action.init("sem_action")
 		sem_observation.init("sem_observation")
 		print("Running as OpenAIGym environment")
@@ -43,7 +44,7 @@ func _physics_process(delta):
 		Engine.iterations_per_second = max(60, Engine.get_frames_per_second())
 		Engine.time_scale = max(1.0, Engine.iterations_per_second/10.0)
 		
-		if OS.get_name()=='X11_SHARED':
+		if mem.exists():
 			sem_action.wait()
 			agent_action = mem.getFloatArray("agent_action")
 			env_action = mem.getIntArray("env_action")
@@ -80,7 +81,7 @@ func _on_Timer_timeout():
 	$ObservationLabel.text = "Observation: "+str(observation)
 	$RewardLabel.text = "Reward: "+str(reward)
 	$TimeLabel.text = "Time:"+str(time_elapsed)
-	if OS.get_name()=='X11_SHARED':	
+	if mem.exists():
 		mem.sendFloatArray("observation", observation)
 		mem.sendFloatArray("reward", reward)
 		mem.sendIntArray("done", [is_done()])

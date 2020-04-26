@@ -11,16 +11,9 @@ var FPS = 60.0
 
 var sem_action
 var sem_observation
-var mem
+var mem = cSharedMemory.new()
 
-
-func get_args():
-	for argument in OS.get_cmdline_args():
-		$CmdLine.text += argument + '\n'
-	
 func _ready():
-	get_args()
-	mem = cSharedMemory.new()
 	if mem.exists():
 		sem_action = cSharedMemorySemaphore.new()
 		sem_observation = cSharedMemorySemaphore.new()
@@ -133,6 +126,7 @@ func _on_Timer_timeout():
 	$StateLabel.text = "State:"+str(state)
 	
 	if mem.exists():
+		
 		mem.sendFloatArray("observation", state)
 		mem.sendFloatArray("reward", [reward])
 		mem.sendIntArray("done", [int(done)])
