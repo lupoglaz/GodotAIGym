@@ -184,15 +184,19 @@ class DummyEnvSemaphores(gym.Env):
                     an observation sent.<br>
                     The <b>Timer</b> properties are shown on the Figure 3. To synchronize the time with the physics server set the Process mode
                     to Physics.
-                    Code 4 shows the important bits of synchronization code in godot. The semaphores are initialized in the <b>_ready</b> function.
-                    We condition their creation on the platform name, because it lets us to run the project in the editor for debugging purposes.
-                    Because we use phyics engine to model the environment, we also synchronize updates with the physiscs server using <b>_physics_process</b>.<br>
+                    Code 4 shows the important bits of synchronization code in godot. The semaphores and shared memory are initialized in the 
+                    <b>_ready</b> function. If the shared memory exists, the project was called from python script, otherwise no semaphores needed.
+                    This lets us to run the project in the editor to debug it.
+                    Because we use phyics engine to model the environment, we also synchronize updates with the physiscs server using 
+                    <b>_physics_process</b>.<br>
                     The engine waits for the actions in the function <b>_physics_process</b> and starts <b>Timer</b> count down. <br>
                     When the <b>Timer</b> returns the signal <b>_on_Timer_timeout</b> we send the observation back to python and release the 
-                    semaphore <b>sem_obs</b>. Also, we signal to the engine, that we wait for the next action by setting <b>timeout</b> variable to true.<br><br>
+                    semaphore <b>sem_obs</b>. Also, we signal to the engine, that we wait for the next action by setting <b>timeout</b> variable to true.
+                    <br><br>
                     We generally want the training to be as fast as possible, so we need to make the engine process faster than real time. It is done 
                     by setting the <b>iterations_per_second</b> property of the engine to the FPS and increasing the timescale to some fraction of 
-                    the <b>iterations_per_second</b>. We use only fraction of the FPS, because we want the engine to perform with reasonably low delta, such that 
+                    the <b>iterations_per_second</b>. We use only fraction of the FPS, because we want the engine to 
+                    perform with reasonably low delta, such that 
                     there are no obvious bugs in the physics. I can not guarantee that this way of increasing the processing speed is valid though.
                 </div>
                 <div class="col">
@@ -200,10 +204,10 @@ class DummyEnvSemaphores(gym.Env):
                     <pre class="pre"><code class="python">
 var deltat = 0.1
 func _ready():
-    if OS.get_name()=='X11_SHARED':
+    mem = cSharedMemory.new()
+    if mem.exists():
         sem_action = cSharedMemorySemaphore.new()
         sem_observation = cSharedMemorySemaphore.new()
-        mem = cSharedMemory.new()
         sem_action.init("sem_action")
         sem_observation.init("sem_observation")
     
@@ -214,7 +218,7 @@ func _physics_process(delta):
         Engine.iterations_per_second = max(60, Engine.get_frames_per_second())
         Engine.time_scale = max(1.0, Engine.iterations_per_second/100.0)
     
-        if OS.get_name()=='X11_SHARED':
+        if mem.exists():
             sem_action.wait()
             agent_action = mem.getIntArray("agent_action")
             env_action = mem.getIntArray("env_action")
@@ -223,7 +227,7 @@ func _physics_process(delta):
         timeout = false
 
 func _on_Timer_timeout():
-    if OS.get_name()=='X11_SHARED':	
+    if mem.exists():	
         mem.sendFloatArray("observation", observation)
         sem_observation.post()
     
@@ -282,16 +286,16 @@ func _ready():
             </div>
             <div class="col">
                 <h2>Exporting the project</h2>
-                Figure 4 shows the custom templates that should be used when exporting the project. The platform we use for the 
-                export is <b>x11_shared</b>. This platform is the copy of <b>x11</b> with minor changes, namely it reads additional argument
-                <b>--handle</b> needed for shared memory allocation and return the <b>OS.get_name()</b> -> X11_SHARED. <br>
-                Code 7 shows how the environment is launched from the python class: we use subprocess package and pass the special handle to the 
-                environment so that it can access the shared memory allocated by python.<br>
-                We have to note, that it is important to redirect stdout and stderr streams to files instead of pipes. We found out that using pipes 
-                makes semaphores stuck in an impossible combination.<br><br>
-                To correctly close the environment process upon termination of the python script we use the <b>atexit</b> package to register the 
-                <b>close</b> function, that terminates the process. This approach works in case of termination of the python script due to errors 
-                as well as manual signals.<br><br><br>
+                We tested this library using debug exporting templates.
+                Just follow the standard godot export procedure and everything should just work.<br><br><br>
+                Code 7 shows how the environment is launched from the python class: we use subprocess package and 
+                pass the special handle to the environment so that it can access the shared memory allocated by python.
+                We have to note, that it is important to redirect stdout and stderr streams to files instead of pipes. 
+                We found out that using pipes makes semaphores stuck in an impossible combination.
+
+                To correctly close the environment process upon termination of the python script we use the atexit package 
+                to register the close function, that terminates the process. This approach works in case of termination of 
+                the python script due to errors as well as manual signals.
             </div>
             <div class="col">
                 <h5>Code 7: Launching the exported environment</h5>
@@ -299,8 +303,9 @@ func _ready():
 class DummyEnvLaunch(gym.Env):
     def __init__(self, exec_path, env_path):
         with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
-            self.process = subprocess.Popen([exec_path, "--handle", "environment",
-             "--path", os.path.abspath(env_path)], stdout=out, stderr=err)
+            self.process = subprocess.Popen([exec_path, 
+            "--path", os.path.abspath(env_path),
+            "--handle", "environment"], stdout=out, stderr=err)
                 
         atexit.register(self.close)
     
@@ -311,7 +316,6 @@ class DummyEnvLaunch(gym.Env):
         </div>
         <div class="row">
             <div class="col">
-                <h5>Figure1</h5>
             </div>
             <div class="col">
                 <h2>Conclusion</h2>

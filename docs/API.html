@@ -126,6 +126,18 @@
                 <script>createHeader("cSharedMemory", "class", "", "cSharedMemory", "");</script>
                 Class to manage sending and receiving tensors in shared memory. Reads the memory handle from the argument <b>--handle</b>, 
                 with which the environment was called.
+                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "exists", "()");</script>
+                Checks if there is shared memory chunk with the handle, passed to the project.
+                <script>
+                    generate_table("cSharedMemory", 
+                                    [
+                                        ["None","","",""]
+                                    ],
+                                    [
+                                        ["shared mem found","CPU","bool",""]
+                                    ]
+                                    );
+                </script>
                 <script>createHeader("cSharedMemory", "function", "cSharedMemory", "sendIntArray", "(name, array)");</script>
                 Sends 1d <b>array</b> with the id  <b>name</b> to the shared memory.
                 <script>
