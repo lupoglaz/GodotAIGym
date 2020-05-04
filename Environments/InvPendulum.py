@@ -117,15 +117,50 @@ class InvPendulumEnv(gym.Env):
 
 
 if __name__=='__main__':
+	import gym
+	from gym import spaces
+	from gym.utils import seeding
+	from matplotlib import pylab as plt
+	env = gym.make("Pendulum-v0")
+	env.reset()
+	# env.env.state = np.array([0.0, 1])
+
 	GODOT_BIN_PATH = "InvPendulum/InvPendulum.x86_64"
 	env_abs_path = "InvPendulum/InvPendulum.pck"
-	env = InvPendulumEnv(exec_path=GODOT_BIN_PATH, env_path=env_abs_path)
-	for i in range(10):
-		done = 0
-		while done == 0:
-			s_prime, r, done, info = env.step(torch.randn(1, dtype=torch.float, device='cpu'))
-			print(s_prime, r, done)
-			if done == 1:
-				break
-		env.reset()
-	env.close()
+	env_my = InvPendulumEnv(exec_path=GODOT_BIN_PATH, env_path=env_abs_path)
+	env_my.reset()
+
+	gym_obs = []
+	gym_rew = []
+	my_obs = []
+	my_rew = []
+	for i in range(100):
+		obs_my, rew_my, done, _ = env_my.step(torch.tensor([1.0]))
+		obs, rew, done, _ = env.step(np.array([1.0]))
+		env.render()
+		gym_obs.append(obs)
+		gym_rew.append(rew)
+		my_obs.append(obs_my)
+		my_rew.append(rew_my)
+	
+	env_my.close()
+	
+	gym_obs = np.array(gym_obs)
+	gym_rew = np.array(gym_rew)
+	my_obs = torch.stack(my_obs, dim=0).numpy()
+	my_rew = np.array(my_rew)
+
+	plt.subplot(1,4,1)
+	plt.plot(gym_rew, label='Gym rewards')
+	plt.plot(my_rew, label='My rewards')
+	plt.subplot(1,4,2)
+	plt.plot(gym_obs[:,0], label='gym obs0')
+	plt.plot(my_obs[:,0], label='my obs0')
+	plt.subplot(1,4,3)
+	plt.plot(gym_obs[:,1], label='gym obs1')
+	plt.plot(my_obs[:,1], label='my obs1')
+	plt.subplot(1,4,4)
+	plt.plot(gym_obs[:,2], label='gym obs2')
+	plt.plot(my_obs[:,2], label='my obs2')
+	plt.legend()
+	plt.show()

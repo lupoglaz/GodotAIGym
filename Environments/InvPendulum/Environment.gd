@@ -30,9 +30,8 @@ func _ready():
 	$Anchor/PinJoint2D/RigidBody2D.init_anchor = AnchorT.xform(JointT.get_origin())
 	$Anchor/PinJoint2D/RigidBody2D.init_origin = AnchorT.xform(JointT.xform(v))
 	$Anchor/PinJoint2D/RigidBody2D.init_rotation = 0.0
-	$Anchor/PinJoint2D/RigidBody2D.init_angular_velocity = 0.0
-	$Anchor/PinJoint2D/RigidBody2D.init_linear_velicity = Vector2(0.0, 0.0)
-	
+	$Anchor/PinJoint2D/RigidBody2D.init_angular_velocity = 1.0
+	$Anchor/PinJoint2D/RigidBody2D.reset = true
 	set_physics_process(true)
 
 func is_done():
@@ -41,8 +40,8 @@ func is_done():
 func _physics_process(delta):
 	
 	if timeout:
-		Engine.iterations_per_second = max(60, Engine.get_frames_per_second())
-		Engine.time_scale = max(1.0, Engine.iterations_per_second/10.0)
+#		Engine.iterations_per_second = max(60, Engine.get_frames_per_second())
+#		Engine.time_scale = min(1.0, Engine.iterations_per_second/10.0)
 		
 		if mem.exists():
 			sem_action.wait()
@@ -70,7 +69,7 @@ func _physics_process(delta):
 		if env_action[1] == 1:
 			get_tree().quit()
 		
-		$Anchor/PinJoint2D/RigidBody2D.torque = agent_action[0]*40.0
+		$Anchor/PinJoint2D/RigidBody2D.torque = agent_action[0]/100.0
 		
 		$Timer.start(deltat)
 		timeout = false
