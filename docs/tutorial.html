@@ -129,7 +129,7 @@ env.close()
             </div>
             <div class="col">
                 <h2>Synchronization in Python</h2>
-                Figure 1 showsh the pattern of interaction between python and godot processes. First, python script 
+                Figure 1 shows the pattern of interaction between python and godot processes. First, python script 
                 samples an action from the model, meanwhile the godot process waits for the action to be passed. In this 
                 case semaphore <b>sem_act</b> is blocked, while <b>sem_obs</b> has green light. <br>
                 When the <b>step</b> function is called the action tensor is sent into the shared memory and <b>sem_act</b> semaphore

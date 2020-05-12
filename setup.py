@@ -5,23 +5,12 @@ from shutil import copyfile, copytree, rmtree
 
 GODOT_PATH = os.environ["GODOT_PATH"]
 
-def patch_script(filename, patched_line):
-	lines = []
-	modified = False
-	with open(filename, 'r') as fin:
-		for line in fin:
-			lines.append(line)
-			if line.find('platform')!=-1 and line != patched_line:
-				lines[-1] = patched_line
-				modified = True
-	
-	if modified:
-		print("Patched %s, line = %s"%(filename, patched_line))
-		with open(filename, 'w') as fout:
-			for line in lines:
-				fout.write(line)
-	else:
-		print("No modifications needed")
+def patch_script(godot_root, filename):
+	current_path = os.getcwd()
+	patch_path = os.path.join(current_path, filename)
+	os.chdir(godot_root)
+	os.system("git am %s"%patch_path)
+	os.chdir(current_path)
 
 def compile_godot(godot_root, platform='x11', target='release_debug', bits=64):
 	current_path = os.getcwd()
@@ -48,6 +37,6 @@ def install_python_module():
 	os.chdir(current_path)
 
 if __name__=='__main__':
+	# patch_script(godot_root=GODOT_PATH, filename="PhysicsPatch/patch")
 	install_module(godot_root=GODOT_PATH, compile=True, rewrite=True)
-	# install_platform(godot_root=GODOT_PATH)
 	install_python_module()

@@ -5,9 +5,9 @@
 Make your Godot project into OpenAI Gym environment to train RL models with PyTorch. This project only runs on Linux systems.
 
 ## Requirements
-1. Godot Engine version >= 3.1 compiled from source
-2. Boost interprocess
-3. Pytorch version >= 1.1
+1. Godot Engine version >= 3.2 compiled from source
+2. Boost interprocess (apt install libboost-container-dev libboost-system-dev libboost-locale-dev)
+3. Pytorch version >= 1.5
 4. Python setuptools
 
 ## Installation
@@ -17,13 +17,15 @@ python setup.py
 ```
 This script does several things:
 1. Copies **GodotSharedMemory** module and compiles standard godot editor (x11 platform).
-2. Copies **x11_shared** platform, compiles godot with it. This platform is needed to run the evironment.
+2. Compiles x11 export template.
 3. Installs python module **GodotEnv** that is used to communicate with the engine.
 
 ## Examples
 There are several example environments in the directory **Environments**:
 
 **InvPendulum** shows the example of environment that relies heavily on the physics engine
+
+**LunarLander** more complex example that shows how to randomize environment upon reset
 
 ## Tutorial and API
 [Tutorial](https://lupoglaz.github.io/GodotGymAI/tutorial.html)
