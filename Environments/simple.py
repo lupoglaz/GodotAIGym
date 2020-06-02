@@ -52,7 +52,7 @@ def train(env_name='CartPole-v0', hidden_sizes=[32], lr=1e-2,
 
     #continuos control
     mu_net = get_mlp(sizes=[obs_dim]+hidden_sizes+[n_acts])
-    sigma_net = get_mlp(sizes=[obs_dim]+hidden_sizes+[n_acts], output_activation=nn.Sigmoid)
+    sigma_net = get_mlp(sizes=[obs_dim]+hidden_sizes+[n_acts], output_activation=nn.Softplus)
     def get_policy(obs):
         log_mu = mu_net(obs)
         log_sigma = sigma_net(obs) + 1E-5
@@ -103,7 +103,9 @@ def train(env_name='CartPole-v0', hidden_sizes=[32], lr=1e-2,
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument('--env_name', '--env', type=str, default='CartPole-v0')
-    parser.add_argument('--env_name', '--env', type=str, default='Pendulum-v0')
+    # parser.add_argument('--env_name', '--env', type=str, default='Pendulum-v0')
+    parser.add_argument('--env_name', '--env', type=str, default='MountainCarContinuous-v0')
+    
     parser.add_argument('--render', action='store_true')
     parser.add_argument('--lr', type=float, default=1e-2)
     args = parser.parse_args()

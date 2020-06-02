@@ -37,12 +37,23 @@ func _ready():
 func is_done():
 	return 0
 	
-func _physics_process(delta):
+func increase_speed(delta, min_delta):
+	var fps = Engine.get_frames_per_second()
+	var phys_fps = Engine.get_iterations_per_second()
 	
-	if timeout:
-#		Engine.iterations_per_second = max(60, Engine.get_frames_per_second())
-#		Engine.time_scale = min(1.0, Engine.iterations_per_second/10.0)
+	if phys_fps < fps:
+		Engine.set_iterations_per_second(0.5*fps)
 		
+	if min_delta < delta:
+		Engine.set_time_scale(1.1*Engine.get_time_scale())
+	else:
+		Engine.set_time_scale(0.9*Engine.get_time_scale())
+	
+	print(delta, "  ", min_delta, " ", Engine.get_time_scale(), " ", fps, " ", phys_fps)
+	
+func _physics_process(delta):
+	if timeout:
+		increase_speed(deltat, delta)
 		if mem.exists():
 			sem_action.wait()
 			agent_action = mem.getFloatArray("agent_action")
