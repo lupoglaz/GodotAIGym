@@ -61,8 +61,6 @@ func _physics_process(delta):
 		save()
 	
 func _process(delta):
-	#pass
-	#var fps = 7000
 	var cur_time = OS.get_ticks_usec()
 	var fps_est = 1000000.0/(cur_time - prev_time - sem_delta)
 	Engine.set_iterations_per_second(fps_est)
