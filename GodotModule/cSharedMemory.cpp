@@ -4,7 +4,6 @@
 
 #include <core/os/os.h>
 
-
 #include <cstdlib> //std::system
 #include <cstddef>
 #include <cassert>

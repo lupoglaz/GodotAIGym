@@ -12,6 +12,12 @@ var reset = false
 var timeout = true
 var deltat = 0.05
 var time_elapsed = 0.0
+var prev_time = 0.0
+var sem_delta = 0.0
+var target_delta = 0.025
+
+var max_num_steps = 500
+var num_steps = 0
 
 func _ready():
 	mem = cSharedMemory.new()
@@ -35,27 +41,29 @@ func _ready():
 	set_physics_process(true)
 
 func is_done():
-	return 0
-	
-func increase_speed(delta, min_delta):
-	var fps = Engine.get_frames_per_second()
-	var phys_fps = Engine.get_iterations_per_second()
-	
-	if phys_fps < fps:
-		Engine.set_iterations_per_second(0.5*fps)
-		
-	if min_delta < delta:
-		Engine.set_time_scale(1.1*Engine.get_time_scale())
+	if num_steps>=max_num_steps:
+		num_steps = 0
+		return 1
 	else:
-		Engine.set_time_scale(0.9*Engine.get_time_scale())
+		return 0
 	
-	print(delta, "  ", min_delta, " ", Engine.get_time_scale(), " ", fps, " ", phys_fps)
+func _process(delta):
+	var cur_time = OS.get_ticks_usec()
+	var fps_est = 1000000.0/(cur_time - prev_time - sem_delta)
+	Engine.set_iterations_per_second(fps_est)
+	Engine.set_time_scale(Engine.get_iterations_per_second()*target_delta)
+	if sem_delta>0:
+		print(fps_est, " | ",Engine.get_iterations_per_second(), " | ", sem_delta)
+	sem_delta = 0.0
+	prev_time = cur_time
 	
 func _physics_process(delta):
 	if timeout:
-		increase_speed(deltat, delta)
 		if mem.exists():
+			var time_start = OS.get_ticks_usec()
 			sem_action.wait()
+			var time_end = OS.get_ticks_usec()
+			sem_delta = time_end - time_start
 			agent_action = mem.getFloatArray("agent_action")
 			env_action = mem.getIntArray("env_action")
 		else:
@@ -98,4 +106,5 @@ func _on_Timer_timeout():
 		sem_observation.post()
 	
 	time_elapsed += deltat
+	num_steps += 1
 	timeout = true

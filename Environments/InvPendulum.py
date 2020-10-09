@@ -41,7 +41,7 @@ class InvPendulumEnv(gym.Env):
 		Terminated after 10s
 	"""
 
-	def __init__(self, exec_path, env_path):
+	def __init__(self, exec_path, env_path, render=True):
 		self.handle = "environment"
 		self.mem = _GodotEnv.SharedMemoryTensor(self.handle)
 		self.sem_act = _GodotEnv.SharedMemorySemaphore("sem_action", 0)
@@ -49,7 +49,10 @@ class InvPendulumEnv(gym.Env):
 
 		#Important: if this process is called with subprocess.PIPE, the semaphores will be stuck in impossible combination
 		with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
-			self.process = subprocess.Popen([exec_path, "--path", os.path.abspath(env_path), "--handle", self.handle], stdout=out, stderr=err)
+			if render:
+				self.process = subprocess.Popen([exec_path, "--path", os.path.abspath(env_path), "--handle", self.handle], stdout=out, stderr=err)
+			else:
+				self.process = subprocess.Popen([exec_path, "--path", os.path.abspath(env_path),"--disable-render-loop", "--handle", self.handle], stdout=out, stderr=err)
 		
 		#Array to manipulate the state of the simulator
 		self.env_action = torch.zeros(2, dtype=torch.int, device='cpu')
@@ -59,7 +62,7 @@ class InvPendulumEnv(gym.Env):
 		#Example of agent action
 		self.agent_action = torch.zeros(1, dtype=torch.float, device='cpu')
 
-		self.max_torque = 10.0
+		self.max_torque = 20.0
 		self.max_speed = 8
 
 		high = np.array([1., 1., self.max_speed])
