@@ -88,7 +88,7 @@ func _physics_process(delta):
 		if env_action[1] == 1:
 			get_tree().quit()
 		
-		$Anchor/PinJoint2D/RigidBody2D.torque = agent_action[0]/100.0
+		$Anchor/PinJoint2D/RigidBody2D.torque = -agent_action[0]/1.0
 		
 		$Timer.start(deltat)
 		timeout = false

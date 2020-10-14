@@ -114,9 +114,9 @@ class DDPG:
 				dst_param.copy_(src_param.clone())
 
 	def load_weights(self, path):
-		self.actor.load_state_dict(torch.load('{}/actor.pkl'.format(path)))
+		self.policy.load_state_dict(torch.load('{}/policy.pkl'.format(path)))
 		self.critic.load_state_dict(torch.load('{}/critic.pkl'.format(path)))
 
 	def save_model(self, path):
-		torch.save(self.actor.state_dict(), '{}/actor.pkl'.format(output))
-		torch.save(self.critic.state_dict(), '{}/critic.pkl'.format(output))
+		torch.save(self.policy.to(device='cpu').state_dict(), '{}/policy.pkl'.format(path))
+		torch.save(self.critic.to(device='cpu').state_dict(), '{}/critic.pkl'.format(path))

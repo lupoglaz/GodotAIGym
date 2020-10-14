@@ -18,7 +18,7 @@ func _integrate_forces(state):
 		var T = Transform2D(0.0, init_anchor)
 		var Tt = Transform2D(0.0, -init_anchor)
 		var R = Transform2D(rng.randf_range(-PI, PI), Vector2(0,0))
-#		var R = Transform2D(PI, Vector2(0,0))
+#		var R = Transform2D(0.0, Vector2(0,0))
 		state.set_transform(T*R*Tt*state.transform)
 		state.set_angular_velocity(init_angular_velocity)
 		state.set_linear_velocity(Vector2(0,0))

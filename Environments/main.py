@@ -15,13 +15,13 @@ from InvPendulum import InvPendulumEnv
 
 if __name__ == '__main__':
 	num_warmup = 1000
-	num_train = 60000
+	num_train = 200000
 	num_eval = 0
 	buffer_length = 600000
 
 	# env = NormalizedEnv(gym.make('Pendulum-v0'))
-	GODOT_BIN_PATH = "InvPendulum/InvPendulum.x86_64"
-	env_abs_path = "InvPendulum/InvPendulum.pck"
+	GODOT_BIN_PATH = "InvPendulum/InvPendulum.server.x86_64"
+	env_abs_path = "InvPendulum/InvPendulum.server.pck"
 	env = NormalizedEnv(InvPendulumEnv(exec_path=GODOT_BIN_PATH, env_path=env_abs_path))
 
 	ddpg = DDPG(env)
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 	average_q = []
 
 	episode = 0
-	for training_step in range(num_train + buffer.max_length + num_eval):
+	for training_step in range(num_train + num_warmup + num_eval):
 	
 		if training_step<=num_warmup:
 			action = ddpg.random_action().to(dtype=state.dtype, device=state.device)
@@ -107,3 +107,4 @@ if __name__ == '__main__':
 			episode += 1
 
 	env.close()
+	ddpg.save_model(path='.')

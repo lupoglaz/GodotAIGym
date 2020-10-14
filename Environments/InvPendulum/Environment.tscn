@@ -32,7 +32,7 @@ node_b = NodePath("RigidBody2D")
 
 [node name="RigidBody2D" type="RigidBody2D" parent="Anchor/PinJoint2D"]
 position = Vector2( 0, 5 )
-mass = 0.01
+mass = 0.04
 linear_damp = 0.0
 angular_damp = 0.0
 script = ExtResource( 2 )

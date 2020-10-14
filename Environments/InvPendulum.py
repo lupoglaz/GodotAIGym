@@ -41,7 +41,7 @@ class InvPendulumEnv(gym.Env):
 		Terminated after 10s
 	"""
 
-	def __init__(self, exec_path, env_path, render=True):
+	def __init__(self, exec_path, env_path, render=False):
 		self.handle = "environment"
 		self.mem = _GodotEnv.SharedMemoryTensor(self.handle)
 		self.sem_act = _GodotEnv.SharedMemorySemaphore("sem_action", 0)
@@ -62,7 +62,7 @@ class InvPendulumEnv(gym.Env):
 		#Example of agent action
 		self.agent_action = torch.zeros(1, dtype=torch.float, device='cpu')
 
-		self.max_torque = 20.0
+		self.max_torque = 8.0
 		self.max_speed = 8
 
 		high = np.array([1., 1., self.max_speed])
@@ -124,12 +124,14 @@ if __name__=='__main__':
 	from gym import spaces
 	from gym.utils import seeding
 	from matplotlib import pylab as plt
-	env = gym.make("Pendulum-v0")
+	from gymPendulum import PendulumEnv
+	# env = gym.make("Pendulum-v0")
+	env = PendulumEnv()
 	env.reset()
 	# env.env.state = np.array([0.0, 1])
 
-	GODOT_BIN_PATH = "InvPendulum/InvPendulum.x86_64"
-	env_abs_path = "InvPendulum/InvPendulum.pck"
+	GODOT_BIN_PATH = "InvPendulum/InvPendulum.server.x86_64"
+	env_abs_path = "InvPendulum/InvPendulum.server.pck"
 	env_my = InvPendulumEnv(exec_path=GODOT_BIN_PATH, env_path=env_abs_path)
 	env_my.reset()
 
@@ -137,9 +139,9 @@ if __name__=='__main__':
 	gym_rew = []
 	my_obs = []
 	my_rew = []
-	for i in range(100):
-		obs_my, rew_my, done, _ = env_my.step(torch.tensor([1.0]))
-		obs, rew, done, _ = env.step(np.array([1.0]))
+	for i in range(1000):
+		obs_my, rew_my, done, _ = env_my.step(torch.tensor([8.0]))
+		obs, rew, done, _ = env.step(np.array([2.0]))
 		env.render()
 		gym_obs.append(obs)
 		gym_rew.append(rew)
