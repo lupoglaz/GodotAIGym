@@ -7,6 +7,8 @@ var sem_action
 var sem_observation
 var sem_reset
 var mem
+var policy
+var policy_action
 
 var reset = false
 var timeout = true
@@ -20,6 +22,8 @@ var max_num_steps = 500
 var num_steps = 0
 
 func _ready():
+	policy = cTorchModel.new()
+	policy.load("../ddpg_policy.zip")
 	mem = cSharedMemory.new()
 	if mem.exists():
 		sem_action = cSharedMemorySemaphore.new()
@@ -48,14 +52,15 @@ func is_done():
 		return 0
 	
 func _process(delta):
-	var cur_time = OS.get_ticks_usec()
-	var fps_est = 1000000.0/(cur_time - prev_time - sem_delta)
-	Engine.set_iterations_per_second(fps_est)
-	Engine.set_time_scale(Engine.get_iterations_per_second()*target_delta)
-	if sem_delta>0:
-		print(fps_est, " | ",Engine.get_iterations_per_second(), " | ", sem_delta)
-	sem_delta = 0.0
-	prev_time = cur_time
+	if mem.exists():
+		var cur_time = OS.get_ticks_usec()
+		var fps_est = 1000000.0/(cur_time - prev_time - sem_delta)
+		Engine.set_iterations_per_second(fps_est)
+		Engine.set_time_scale(Engine.get_iterations_per_second()*target_delta)
+		if sem_delta>0:
+			print(fps_est, " | ",Engine.get_iterations_per_second(), " | ", sem_delta)
+		sem_delta = 0.0
+		prev_time = cur_time
 	
 func _physics_process(delta):
 	if timeout:
@@ -78,6 +83,9 @@ func _physics_process(delta):
 				env_action[0] = 1
 			if Input.is_key_pressed(KEY_ESCAPE):
 				env_action[1] = 1
+			if policy_action != null:
+				agent_action = policy_action
+				agent_action[0]*=8.0
 		
 		$ActionLabel.text = "Action: "+str(agent_action)
 		
@@ -104,6 +112,8 @@ func _on_Timer_timeout():
 		mem.sendFloatArray("reward", reward)
 		mem.sendIntArray("done", [is_done()])
 		sem_observation.post()
+	else:
+		policy_action = policy.run(observation)
 	
 	time_elapsed += deltat
 	num_steps += 1

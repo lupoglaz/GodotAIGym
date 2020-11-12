@@ -10,6 +10,9 @@
 #include <vector>
 #include <exception>
 
+#include <torch/script.h>
+using namespace torch::indexing;
+
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
@@ -97,6 +100,36 @@ class cSharedMemorySemaphore : public Reference {
             mutex->wait();
             // std::cout<<"Waited semaphore "<<*name<<std::endl;
         };
+};
+
+class cTorchModel : public Reference{
+    GDCLASS(cTorchModel, Reference);
+
+    private:
+        torch::jit::script::Module module;
+
+    protected:
+        static void _bind_methods();
+
+    public:
+        cTorchModel(){;};
+        ~cTorchModel(){;};
+
+        void load(String path){
+            this->module = torch::jit::load(path.ascii().get_data());
+        };
+        PoolVector<float> run(const PoolVector<float> &input){
+            PoolVector<float> output;
+            at::Tensor input_t = torch::zeros({1, input.size()}, torch::TensorOptions().dtype(torch::kFloat32));
+            for(int i=0; i<input.size(); i++) input_t.index_put_({0,i}, input[i]);
+            std::vector<torch::jit::IValue> inputs;
+            inputs.push_back(input_t);
+            at::Tensor output_t = this->module.forward(inputs).toTensor();
+            auto output_t_a = output_t.accessor<float,2>();
+            for(int i=0; i<output_t.sizes()[1]; i++) output.push_back(output_t_a[0][i]);
+            return output;
+        }
+
 };
 
 #endif

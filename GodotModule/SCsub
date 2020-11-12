@@ -2,11 +2,50 @@
 import os
 Import('env')
 
+#env_sum = env.Clone()
+
+#src_list = ["cSharedMemory.cpp", "register_types.cpp"]
+#env_sum.add_source_files(env.modules_sources, src_list)
+
+#env.Append(LIBS=[   #"boost_locale", 
+#                    "boost_system", 
+#                    "stdc++", "pthread", "rt"])
+
+
+torch_rlibdirs = [
+    "/home/lupoglaz/Projects/godot/modules/GodotSharedMemory/libtorch/lib"
+]
+
+torch_include = [
+    "libtorch/include",
+    "libtorch/include/torch/csrc/api/include"
+]
+
+torch_libdirs = [
+    "/home/lupoglaz/Projects/godot/modules/GodotSharedMemory/libtorch/lib",
+    "/usr/lib/x86_64-linux-gnu",
+]
+
+#torch_libnames_cpu = ["boost_system", "stdc++", "m", "torch", "caffe2", "c10", "pthread", "dl", "rt", "X11"]
+torch_libnames_cpu = ["boost_system", "stdc++", "m", "torch_cpu", "torch", "c10", "pthread", "dl", "rt", "X11"]
+
 env_sum = env.Clone()
+#env_sum.Replace(C = "gcc-7")
+#env_sum.Replace(CC = "gcc-7")
+#env_sum.Replace(CXX = "g++-7")
+env_sum.Append(LINKFLAGS=['-Wl,--no-undefined', '-Wl,--no-as-needed'])
+env_sum.Append(CPPPATH=torch_include)
+env_sum.Append(LIBPATH=torch_libdirs)
+env_sum.Append(RPATH=torch_rlibdirs)
+env_sum.Append(LIBS=torch_libnames_cpu)
+env_sum.Append(CPPDEFINES={'-D_GLIBCXX_USE_CXX14_ABI' : 0 })
+env_sum.Append(CXXFLAGS=['-O2', '-Wall', '-std=gnu++14', '-fPIC'])
 
 src_list = ["cSharedMemory.cpp", "register_types.cpp"]
 env_sum.add_source_files(env.modules_sources, src_list)
 
-env.Append(LIBS=[   #"boost_locale", 
-                    "boost_system", 
-                    "stdc++", "pthread", "rt"])
+env.Append(LINKFLAGS=['-Wl,--no-undefined', '-Wl,--no-as-needed'])
+env.Append(LIBPATH=torch_libdirs)
+env.Append(RPATH=torch_rlibdirs)
+env.Append(LIBS=torch_libnames_cpu)
+#env.Append(CPPDEFINES={'-D_GLIBCXX_USE_CXX11_ABI' : 0 })
