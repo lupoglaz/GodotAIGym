@@ -2,8 +2,12 @@
 #ifndef SUMMATOR_H
 #define SUMMATOR_H
 
+
 #include "core/reference.h"
 #include "core/pool_vector.h"
+#include "core/io/resource_loader.h"
+#include "core/variant_parser.h"
+#include "core/project_settings.h"
 
 #include <iostream>
 #include <string>
@@ -102,8 +106,8 @@ class cSharedMemorySemaphore : public Reference {
         };
 };
 
-class cTorchModel : public Reference{
-    GDCLASS(cTorchModel, Reference);
+class cTorchModel : public Resource{
+    GDCLASS(cTorchModel, Resource);
 
     private:
         torch::jit::script::Module module;
@@ -115,8 +119,19 @@ class cTorchModel : public Reference{
         cTorchModel(){;};
         ~cTorchModel(){;};
 
-        void load(String path){
-            this->module = torch::jit::load(path.ascii().get_data());
+        void load(const String &path){
+            // FileAccess *fa = FileAccess::create(FileAccess::ACCESS_RESOURCES);
+            String p_path;
+            if (ProjectSettings::get_singleton()) {
+				if (path.begins_with("res://")) {
+					String resource_path = ProjectSettings::get_singleton()->get_resource_path();
+					if (resource_path != "") {
+						p_path = path.replace("res:/", resource_path);
+					}
+					p_path = path.replace("res://", "");
+				}
+			}
+            this->module = torch::jit::load(p_path.ascii().get_data());
         };
         PoolVector<float> run(const PoolVector<float> &input){
             PoolVector<float> output;
@@ -130,6 +145,30 @@ class cTorchModel : public Reference{
             return output;
         }
 
+};
+
+class cTorchModelLoader : public ResourceFormatLoader {
+    GDCLASS(cTorchModelLoader, ResourceFormatLoader);
+public:
+    virtual RES load(const String &p_path, const String &p_original_path, Error *r_error = NULL){
+        Ref<cTorchModel> model = memnew(cTorchModel);
+        if (r_error) {
+            *r_error = OK;
+        }
+        model->load(p_path);
+        return model;
+    }
+    virtual void get_recognized_extensions(List<String> *r_extensions) const{
+        if (!r_extensions->find("zip")) {
+            r_extensions->push_back("zip");
+        }
+    }
+    virtual bool handles_type(const String &p_type) const{
+        return ClassDB::is_parent_class(p_type, "cTorchModel");
+    }
+    virtual String get_resource_type(const String &p_path) const{
+        return "cTorchModel";
+    }
 };
 
 #endif

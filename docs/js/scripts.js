@@ -94,9 +94,9 @@ function createHeader(container, type, module, name, params=""){
     obj_container.className = "container";
 
     var header_obj = document.createElement("div");
-    header_obj.className = "p-3 mb-2 bg-dark text-white";
+    header_obj.className = "p-1 mb-4 bg-dark text-white";
     var text_obj = document.createElement("P");
-    text_obj.className = "h2";
+    text_obj.className = "h4";
     
     var type_obj = document.createElement("EM");
     var type_text = document.createTextNode(type+' ');

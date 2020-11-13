@@ -7,7 +7,7 @@ var sem_action
 var sem_observation
 var sem_reset
 var mem
-var policy
+onready var policy = load("res://ddpg_policy.zip")
 var policy_action
 
 var reset = false
@@ -22,8 +22,6 @@ var max_num_steps = 500
 var num_steps = 0
 
 func _ready():
-	policy = cTorchModel.new()
-	policy.load("../ddpg_policy.zip")
 	mem = cSharedMemory.new()
 	if mem.exists():
 		sem_action = cSharedMemorySemaphore.new()
