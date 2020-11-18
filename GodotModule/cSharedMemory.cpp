@@ -140,8 +140,3 @@ void cSharedMemorySemaphore::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("wait"), &cSharedMemorySemaphore::wait);
 	ClassDB::bind_method(D_METHOD("init", "str"), &cSharedMemorySemaphore::init);
 }
-
-void cTorchModel::_bind_methods(){
-	ClassDB::bind_method(D_METHOD("load", "str"), &cTorchModel::load);
-	ClassDB::bind_method(D_METHOD("run", "array"), &cTorchModel::run);
-}

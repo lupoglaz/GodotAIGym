@@ -2,15 +2,8 @@
 import os
 Import('env')
 
-#env_sum = env.Clone()
-
-#src_list = ["cSharedMemory.cpp", "register_types.cpp"]
-#env_sum.add_source_files(env.modules_sources, src_list)
-
-#env.Append(LIBS=[   #"boost_locale", 
-#                    "boost_system", 
-#                    "stdc++", "pthread", "rt"])
-
+#Currently static linking does not work
+#Shared libraries should be in the torch_rlibdirs directory
 
 torch_rlibdirs = [
     "/home/lupoglaz/Projects/godot/modules/GodotSharedMemory/libtorch/lib"
@@ -28,11 +21,12 @@ torch_libdirs = [
 
 #torch_libnames_cpu = ["boost_system", "stdc++", "m", "torch", "caffe2", "c10", "pthread", "dl", "rt", "X11"]
 torch_libnames_cpu = ["boost_system", "stdc++", "m", "torch_cpu", "torch", "c10", "pthread", "dl", "rt", "X11"]
+#torch_libnames_cpu = [  "boost_system", "stdc++", "m", 
+#                        "clog", "cpuinfo", "libprotobuf", "libprotoc", "onnx_proto", "onnx", "c10", "fbgemm", "dnnl", "foxi_loader", "caffe2_protos", 
+#                        "Caffe2_perfkernels_avx", "Caffe2_perfkernels_avx2", "Caffe2_perfkernels_avx512",
+#                        "pthread", "dl", "rt", "X11"]
 
 env_sum = env.Clone()
-#env_sum.Replace(C = "gcc-7")
-#env_sum.Replace(CC = "gcc-7")
-#env_sum.Replace(CXX = "g++-7")
 env_sum.Append(LINKFLAGS=['-Wl,--no-undefined', '-Wl,--no-as-needed'])
 env_sum.Append(CPPPATH=torch_include)
 env_sum.Append(LIBPATH=torch_libdirs)
@@ -49,3 +43,8 @@ env.Append(LIBPATH=torch_libdirs)
 env.Append(RPATH=torch_rlibdirs)
 env.Append(LIBS=torch_libnames_cpu)
 #env.Append(CPPDEFINES={'-D_GLIBCXX_USE_CXX11_ABI' : 0 })
+#env.Append(CPPDEFINES={'-DBUILD_CAFFE2_MOBILE' : 'OFF' })
+#env.Append(CPPDEFINES={'-DBUILD_SHARED_LIBS' : 'OFF' })
+#env.Append(CPPDEFINES={'-DUSE_CUDA' : 'OFF' })
+#env.Append(CPPDEFINES={'-DBUILD_PYTHON' : 'OFF' })
+#env.Append(CPPDEFINES={'-DBUILD_TEST' : 'OFF' })

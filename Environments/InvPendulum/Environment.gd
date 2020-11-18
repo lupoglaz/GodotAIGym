@@ -7,7 +7,9 @@ var sem_action
 var sem_observation
 var sem_reset
 var mem
-onready var policy = load("res://ddpg_policy.zip")
+#onready var policy_data = preload("res://ddpg_policy.jit")
+onready var policy_data = load("res://ddpg_policy.tres")
+var policy
 var policy_action
 
 var reset = false
@@ -31,7 +33,10 @@ func _ready():
 		sem_action.init("sem_action")
 		sem_observation.init("sem_observation")
 		print("Running as OpenAIGym environment")
-	
+	else:
+		policy = cTorchModel.new()
+		policy.set_data(policy_data)
+		
 	var v = $Anchor/PinJoint2D/RigidBody2D.transform.get_origin()
 	var AnchorT = $Anchor.transform
 	var JointT = $Anchor/PinJoint2D.transform
