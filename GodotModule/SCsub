@@ -1,13 +1,13 @@
 # SCsub
 import os
+
 Import('env')
 
 #Currently static linking does not work
 #Shared libraries should be in the torch_rlibdirs directory
 
 torch_rlibdirs = [
-    "/home/lupoglaz/Projects/godot/modules/GodotSharedMemory/libtorch/lib"
-]
+    os.path.join(Dir('.').abspath, 'libtorch/lib'), "."]
 
 torch_include = [
     "libtorch/include",
@@ -15,8 +15,9 @@ torch_include = [
 ]
 
 torch_libdirs = [
-    "/home/lupoglaz/Projects/godot/modules/GodotSharedMemory/libtorch/lib",
+    os.path.join(Dir('.').abspath, 'libtorch/lib'),
     "/usr/lib/x86_64-linux-gnu",
+    "."
 ]
 
 #torch_libnames_cpu = ["boost_system", "stdc++", "m", "torch", "caffe2", "c10", "pthread", "dl", "rt", "X11"]
