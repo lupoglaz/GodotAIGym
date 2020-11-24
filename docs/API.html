@@ -245,6 +245,45 @@
                 created. Meanwhile python classes create them on initialization.
             </div>
         </div>
+
+
+        <div class="starter-template">
+            <h1>Deployment</h1>
+        </div>
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                <h1>Godot</h1>
+            </div>
+            <div class="col">
+                <h1>Description</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col" id="">
+            </div>
+            <div class="col" id="ModelData">
+            <script>createHeader("ModelData", "class", "", "cTorchModelLoader", "");</script>
+            Resource that loads model data from traced torch model. Recognizes .jit files.
+            
+            <script>createHeader("ModelData", "class", "", "cTorchModelData", "");</script>
+            Stores model data in PoolByteArray.
+
+            <script>createHeader("ModelData", "class", "", "cTorchModel", "");</script>
+            Class for executing torch models
+
+            <script>createHeader("ModelData", "function", "cTorchModel", "init", "(data)");</script>
+            Loads data from <b>cTorchModelData</b> into torch model, that is ready for execution.
+
+            <script>createHeader("ModelData", "function", "cTorchModel", "run", "(input)");</script>
+            Passes the argument <b>input</b> into torch model, returns the result. Input should be <b>FloatArray</b>.
+
+            </div>
+            <div class="col">
+                These classes manage torch jit model loading and executing in Godot engine.
+            </div>
+        </div>
     </div><!-- /.container -->
 </main>
 

@@ -1,4 +1,4 @@
-# GodotGymAI
+# GodotAIGym
 ![logo](docs/Fig/GodotGymLogo.png)
 
 
@@ -16,12 +16,13 @@ First, in **setup.py** change the variable **GODOT_PATH** to the root directory 
 python setup.py
 ```
 This script does several things:
-1. Copies **GodotSharedMemory** module and compiles standard godot editor (x11 platform).
-2. Compiles x11 export template.
-3. Installs python module **GodotEnv** that is used to communicate with the engine.
+1. Downloads libtorch cpu only version, unpacks it
+2. Copies **GodotSharedMemory** module and compiles standard godot editor (x11 platform).
+3. Compiles x11 export template, dev tools and server templates
+4. Installs python module **GodotEnv** that is used to communicate with the engine.
 
 ## Examples
-There are several example environments in the directory **Environments**:
+There are several example environments in the directory **Tutorials**:
 
 **InvPendulum** shows the example of environment that relies heavily on the physics engine
 
