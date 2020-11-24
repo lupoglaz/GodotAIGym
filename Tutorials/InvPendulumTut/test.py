@@ -34,7 +34,7 @@ if __name__ == '__main__':
 	traced_policy = torch.jit.trace(policy, state)
 	print(traced_policy.graph)
 	print(traced_policy.code)
-	traced_policy.save('ddpg_policy.zip')
+	traced_policy.save('ddpg_policy.jit')
 
 	for step in range(1000):
 	

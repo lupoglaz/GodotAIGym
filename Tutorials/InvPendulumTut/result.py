@@ -116,8 +116,8 @@ def plot_histograms(log):
 	plt.imshow(mpimg.imread('pol_act_h.png'))
 	plt.axis('off')
 	plt.tight_layout()
-	plt.show()
-	# plt.savefig("test.png", bbox_inches='tight')
+	# plt.show()
+	plt.savefig("test.png", bbox_inches='tight')
 
 
 if __name__=='__main__':
@@ -166,4 +166,5 @@ if __name__=='__main__':
 	plt.subplot(3, 2, 5)
 	p = plt.plot(average_q, color='red')
 	plt.legend(p, ['Average expected reward'])
-	plt.show()
+	# plt.show()
+	plt.savefig("result.png", bbox_inches='tight')

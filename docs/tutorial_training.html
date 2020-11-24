@@ -44,49 +44,60 @@
     
 <main role="main" class="container-fluid">
     <div class="starter-template">
-        <h1>Tutorial</h1>
+        <h1>Training tutorial</h1>
     </div>
     <div class="container-fluid">
         <div class="row">
             <div class="col">
+                <h5>Figure1</h5>
+                <img src="Fig/DDPG.png" class="rounded mx-auto d-block float-center" alt="Training process" width=80%>
             </div>
             <div class="col">
                 <h2>Introduction</h2>
-                When training reinforcement learning agents, the agent interacts with the environment by sending actions and receiving observations.
-                The agents are trained in a python script and the environment is implemented using Godot. <br>
-                In python the environment is wrapped into a class, that is usually similar to OpenAI Gym environment class (Code 1). We need to implement 
-                the functions: <b>init</b>, <b>step</b>, <b>reset</b> and <b>close</b> to get fully functional environment. <br><br>
-                The <b>init</b> function launches subprocesses associated with your environment. In our case it launches Godot 
-                project as a subprocess.<br>
-                The <b>step</b> function takes an action tensor that was sampled from your model and passes it to the environment. It then computes 
-                the next state and returns the observation of this state along with the reward. The variable <b>done</b> is <b>true</b> if the new state is the 
-                final one, <b>false</b> otherwise.<br>
-                The <b>reset</b> function returns the environment to the initial state and returns the observation of this state.<br>
-                The <b>close</b> function closes all subprocesses associated with your environment.<br>
-                We will ignore <b>seed</b> and <b>render</b> functions for now, because we use random number generator in Godot 
-                and rendering is done by default.<br>
+                Unlike supervised training algorithms, DRL and your success in training a model for your environment strongly depends 
+                on the details of implementation of your training algorithm. In this tutorial we use DDPG, however we do not follow 
+                the publication in details. <br><br>
+
+                The key idea of the algorithm is that we have two neural networks: the policy network and critic network. Policy network 
+                is the one that generates action of the agent using the observer state of the environment. The critic network, instead takes 
+                the state and generated action as inputs and tries to predict the future cumulative reward of such action in this state.<br><br>
+
+                The training step has two substeps. First we compute gradient for the critic neural network and make a gradient descent step. 
+                The problem of training the critic is supervised, because we know the next state and action and we compare predictions of 
+                the critic for the current state and current action with the next state and the next action. They should differ by a discounted reward.<br><br>
+                
+                Then we optimize policy using the critic network as a loss function: the policy should output the best possible action, 
+                therefore maximizing critic prediction.<br>
+                The additional target critic and policy networks are used for the stability of the algorithm.
+                
+                <b>Figure1</b> shows the outline of the algorithm. <b>Code1</b> is the corresponding code for one step of the 
+                training process (implemented in DDPG.py).<br><br><br>
             </div>
             <div class="col">
-                <h5>Code 1: Dummy implementation of an OpenAI Gym class.</h5>
+                <h5>Code 1: DDPG.py.</h5>
                 <pre class="pre"><code class="python">
-class DummyEnv(gym.Env):
-    def __init__(self):
-        pass
+def train(self, buffer):
+    b_state, b_action, b_reward, b_state_next, b_term = buffer.sample(self.batch_size)
+    with torch.no_grad():
+        action_target = self.policy_target(b_state_next)
+        Q_prime = self.critic_target(b_state_next, action_target)
 
-    def seed(self, seed=None):
-        pass
+    self.opt_critic.zero_grad()
+    Q = self.critic(b_state, b_action)
+    L_critic = self.critic_loss(Q, b_reward + self.gamma*Q_prime*(1.0-b_term))
+    L_critic.backward()
+    self.opt_critic.step()
+    
+    self.opt_policy.zero_grad()
+    action = self.policy(b_state)
+    L_Q = -1.0*self.critic(b_state, action).mean()
+    L_Q.backward()
+    self.opt_policy.step()
 
-    def step(self, action):
-        return observation, reward, done, info
-        
-    def reset(self):
-        return observation
-        
-    def render(self, mode='human'):
-        pass
+    self.soft_update(self.critic, self.critic_target)
+    self.soft_update(self.policy, self.policy_target)
 
-    def close(self):
-        pass
+    return L_critic.item(), L_Q.item()
                 </code></pre>
             </div>
         </div>
@@ -95,136 +106,86 @@ class DummyEnv(gym.Env):
             </div>
             <div class="col">
                 <h2>Training cycle</h2>
-                The training cycle for a reinforcement learning agent looks something like this (Code 2):<br>
-                we collect samples until we observed <b>n_rollout</b> states, these observations along with actions and rewards
-                are collected in the batch.<br>
-                Then the model does one gradient step, empties its batch and resumes simulation. During the simulation, all the actions are 
-                sampled from the model itself.
+                The main training cycle is rather simple (<b>Code2</b>), however the important detail here is the warmup period. 
+                We sample random actions to give initial training some information on rewards and states of the environment. Because the policy 
+                network relies on critic for training, without this step the critic neural network will likely overfit the initial state and action 
+                and won't provide any useful direction to impove the policy. <br><br>
+                <b>Code2</b> also shows that we place state, action, reward and the next state into the buffer, from which we sample 
+                during the training step.<br><br><br>
             </div>
             <div class="col">
-                <h5>Code 2: Dummy code for training an agent.</h5>
+                <h5>Code 2: DDPG training cycle (main.py)</h5>
                 <pre class="pre"><code class="python">
-env = DummyEnv()
-for i in range(num_epochs):
-    done = 0
-    while done == 0:
-        for t in range(n_rollout):
-            a = model.sample()
-            s_prime, r, done, info = env.step(a)
-            model.put_data((s, a, r, s_prime, done))
-		    s = s_prime
-            if done:
-                break
-        model.train_net()
-    env.reset()
-env.close()
-                </code></pre>
+for training_step in range(num_train + num_warmup):
+    if training_step<=num_warmup:
+        action = ddpg.random_action().to(dtype=state.dtype, device=state.device)
+    else:
+        action = ddpg.select_action(state, noise)
+    
+    state_next, reward, term, _ = env.step(action.cpu())
+    state_next = state_next.to(dtype=state.dtype, device=state.device)
+    buffer.append(state, action, reward, state_next, term)
+
+    if training_step>num_warmup:
+        critic_loss, policy_loss = ddpg.train(buffer)
+    state = state_next.clone()
+            </code></pre>
             </div>
         </div>
 
         <div class="row">
             <div class="col">
-                <h5>Figure1: Synchronization diagram between python script and the environment.</h5>
-                <img src="Fig/Process.png" class="rounded mx-auto d-block float-center" alt="Training process" width=80%>
             </div>
             <div class="col">
-                <h2>Synchronization in Python</h2>
-                Figure 1 shows the pattern of interaction between python and godot processes. First, python script 
-                samples an action from the model, meanwhile the godot process waits for the action to be passed. In this 
-                case semaphore <b>sem_act</b> is blocked, while <b>sem_obs</b> has green light. <br>
-                When the <b>step</b> function is called the action tensor is sent into the shared memory and <b>sem_act</b> semaphore
-                turns green. It signals to godot to start processing the action of an agent. Meanwhile the semaphore <b>sem_obs</b> turns
-                red, blocking python process while waiting for godot to send the observation.<br>
-                In Godot we have to put synchronization procedures in a <b>_physics_process</b> if we have physics-based environment. In other cases 
-                we can use standard <b>_process</b> function.
+                <h2>Normalizing the environment</h2>
+                Often we want to scale the reward as well as action space of the environment. In this particular case just action normalization 
+                is enough to train the policy. In the case you want to scale the reward, do not change the scaling factor during training, because critic 
+                tries to predict the values of the reward. Also, do not subtract reward average, because it makes algorithm think that it's getting
+                rewards where there are none.<br><br><br>
             </div>
             <div class="col">
-                <h5>Code 3: Introducing semaphores.</h5>
+                <h5>Code 4: Environment scaling</h5>
                 <pre class="pre"><code class="python">
-class DummyEnvSemaphores(gym.Env):
-    def __init__(self):
-        self.mem = _GodotEnv.SharedMemoryTensor("environment")
-        self.sem_act = _GodotEnv.SharedMemorySemaphore("sem_action", 0)
-        self.sem_obs = _GodotEnv.SharedMemorySemaphore("sem_observation", 0)
+main.py:
+GODOT_BIN_PATH = "InvPendulum/InvPendulum.server.x86_64"
+env_abs_path = "InvPendulum/InvPendulum.server.pck"
+env = NormalizedEnv(InvPendulumEnv(exec_path=GODOT_BIN_PATH, env_path=env_abs_path))
 
-    def seed(self, seed=None):
-        pass
+NormalizedEnvironment.py:
+class NormalizedEnv(gym.ActionWrapper):
+    def action(self, action):
+        act_k = torch.from_numpy(self.action_space.high - self.action_space.low)/2.0
+        act_b = torch.from_numpy(self.action_space.high + self.action_space.low)/2.0
+        return act_k * action + act_b
 
-    def step(self, action):
-        self.mem.sendInt("agent_action", action)
-        self.sem_act.post()
-
-        self.sem_obs.wait()
-        observation = self.mem.receiveFloat("observation")
-        
-        return observation, reward, done, info
-        
-    def reset(self):
-        return observation
-        
-    def render(self, mode='human'):
-        pass
-
-    def close(self):
-        pass
+    def reverse_action(self, action):
+        act_k_inv = 2.0/(self.action_space.high - self.action_space.low)
+        act_b = (self.action_space.high + self.action_space.low)/2.0
+        return act_k_inv * (action - act_b)
                 </code></pre>
             </div>
         </div>
         <div class="row">
                 <div class="col">
-                    <h5>Figure 2: Scene organization</h5>
-                    <img src="Fig/SceneAnnotated.png" class="rounded mx-auto d-block float-center" alt="Annotated scene" width=80%>
-                    <h5>Figure 3: Timer properties</h5>
-                    <img src="Fig/TimerProperties.png" class="rounded mx-auto d-block float-center" alt="Timer inspector">
+                    <h5>Figure 2: Plots</h5>
+                    <img src="Fig/result.png" class="rounded mx-auto d-block float-center" alt="Annotated scene" width=80%>
                 </div>
                 <div class="col">
-                    <h2>Synchronization in Godot</h2>
-                    Godot scene contains a pendulum consisting of <b>StaticBody2D</b>, <b>PinJoint2D</b> and <b>RigidBody2D</b>. Moreover,
-                    it has the <b>Timer</b>, synchronized with the physics server that counts down the time between an action received and 
-                    an observation sent.<br>
-                    The <b>Timer</b> properties are shown on the Figure 3. To synchronize the time with the physics server set the Process mode
-                    to Physics.
-                    Code 4 shows the important bits of synchronization code in godot. The semaphores and shared memory are initialized in the 
-                    <b>_ready</b> function. If the shared memory exists, the project was called from python script, otherwise no semaphores needed.
-                    This lets us to run the project in the editor to debug it.
-                    Because we use phyics engine to model the environment, we also synchronize updates with the physiscs server using 
-                    <b>_physics_process</b>.<br>
-                    The engine waits for the actions in the function <b>_physics_process</b> and starts <b>Timer</b> count down. <br>
-                    When the <b>Timer</b> returns the signal <b>_on_Timer_timeout</b> we send the observation back to python and release the 
-                    semaphore <b>sem_obs</b>. Also, we signal to the engine, that we wait for the next action by setting <b>timeout</b> variable to true.
-                    <br>
+                    <h2>What to plot</h2>
+                    <b>1.Critic loss</b>: you want to be sure that the critic is able to predict future rewards, because it provides the information 
+                    for training the policy itself. If this step does not work, the whole algorithm breaks. However if the loss is zero, then
+                    your critic overfitted to a small state space, which is equally bad.<br><br>
+
+                    <b>2.Average episode reward</b>: this is the main outcome of the training algorithm, you'll have to look at it anyway.<br><br>
+
+                    <b>3.Policy entropy</b>: this is very informative metric of how sure your policy is in its predictions. You can detect overfitting
+                    of the policy if the entropy has stable value. Generally it's hard to get entropy for DDPG algorithm, but in this case we can sample
+                    the state space and approximate the entropy.<br><br>
+
+                    <b>Figure2</b> shows these plots for a successful training run.
+                    
                 </div>
                 <div class="col">
-                    <h5>Code 4: Environment node script</h5>
-                    <pre class="pre"><code class="python">
-var deltat = 0.1
-func _ready():
-    mem = cSharedMemory.new()
-    if mem.exists():
-        sem_action = cSharedMemorySemaphore.new()
-        sem_observation = cSharedMemorySemaphore.new()
-        sem_action.init("sem_action")
-        sem_observation.init("sem_observation")
-    
-    set_physics_process(true)
-
-func _physics_process(delta):
-    if timeout:    
-        if mem.exists():
-            sem_action.wait()
-            agent_action = mem.getIntArray("agent_action")
-            env_action = mem.getIntArray("env_action")
-        
-        $Timer.start(deltat)
-        timeout = false
-
-func _on_Timer_timeout():
-    if mem.exists():	
-        mem.sendFloatArray("observation", observation)
-        sem_observation.post()
-    
-    timeout = true
-                    </code></pre>
                 </div>
             </div>
         </div>
@@ -232,91 +193,12 @@ func _on_Timer_timeout():
             <div class="col">
             </div>
             <div class="col">
-                <h2>Resetting the environment</h2>
-                When the episode of the simulation ends we want to reset the environment to the initial position without relaunching 
-                the engine process. To accomplish this feat we use additional action, that is 1 if the environment should be reset and 
-                0 otherwise. However, the tricky part is resetting the positions and velocities of the objects in Godot.<br>
-                In our case we have one physics object: <b>RigidBody2D</b>. The positions and velocities of the <b>RigidBody2D</b> node can be changed
-                only in the <b>_integrate_forces</b> function of this node. Therefore we introduce the variable <b>reset</b>, which is true when we 
-                want to reinitialize this node and false otherwise. Additionally we create variables to store initial positions and velocities of this node.<br>
-                The Code 5 shows the gist of this function. First we compute absolute initial <b>Transform2D</b> of the node and change the state accordingly.<br>
-                Unfortunatelly, we have to compute the transforms of <b>Anchor</b> and <b>PinJoint2D</b> in the <b>Environment</b> script (Code 6).
-                Probably, one can avoid this cumbersome procedure by reorganizing the tree or accessing the parent nodes from the <b>RigidBody2D</b> itself.
-            </div>
-            <div class="col">
-                <h5>Code 5: Resetting the state of the RigidBody2D</h5>
-                <pre class="pre"><code class="python">
-func _integrate_forces(state):
-    if reset:
-        var T = Transform2D(0.0, init_anchor)
-        var Tt = Transform2D(0.0, -init_anchor)
-        var R = Transform2D(rng.randf_range(-PI, PI), Vector2(0,0))
-        var v = Transform2D(init_rotation, init_origin)
-        state.set_transform(T*R*Tt*state.transform)
-        state.set_angular_velocity(init_angular_velocity)
-        state.set_linear_velocity(init_linear_velicity)
-        reset = false
-                </code></pre>
-                <h5>Code 6: Initial positions of the RigidBody2D from Environment node</h5>
-                <pre class="pre"><code class="python">
-func _ready():
-    var v = $Anchor/PinJoint2D/RigidBody2D.transform.get_origin()
-    var AnchorT = $Anchor.transform
-    var JointT = $Anchor/PinJoint2D.transform
-    $Anchor/PinJoint2D/RigidBody2D.init_anchor = AnchorT.xform(JointT.get_origin())
-    $Anchor/PinJoint2D/RigidBody2D.init_origin = AnchorT.xform(JointT.xform(v))
-    $Anchor/PinJoint2D/RigidBody2D.init_rotation = 0.0
-    $Anchor/PinJoint2D/RigidBody2D.init_angular_velocity = 0.0
-    $Anchor/PinJoint2D/RigidBody2D.init_linear_velicity = Vector2(0.0, 0.0)
-                </code></pre>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <h5>Figure 4: Exporting Godot project</h5>
-                <img src="Fig/ExportTemplates.png" class="rounded mx-auto d-block float-center" alt="Export templates" width=100%>
-            </div>
-            <div class="col">
-                <h2>Exporting the project</h2>
-                We tested this library using debug exporting templates.
-                Just follow the standard godot export procedure and everything should just work.<br><br><br>
-                Code 7 shows how the environment is launched from the python class: we use subprocess package and 
-                pass the special handle to the environment so that it can access the shared memory allocated by python.
-                We have to note, that it is important to redirect stdout and stderr streams to files instead of pipes. 
-                We found out that using pipes makes semaphores stuck in an impossible combination.
-
-                To correctly close the environment process upon termination of the python script we use the atexit package 
-                to register the close function, that terminates the process. This approach works in case of termination of 
-                the python script due to errors as well as manual signals.
-            </div>
-            <div class="col">
-                <h5>Code 7: Launching the exported environment</h5>
-                <pre class="pre"><code class="python">
-class DummyEnvLaunch(gym.Env):
-    def __init__(self, exec_path, env_path):
-        with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
-            self.process = subprocess.Popen([exec_path, "--path", 
-            os.path.abspath(env_path), 
-            "--handle", self.handle], stdout=out, stderr=err)
-                
-        atexit.register(self.close)
-    
-    def close(self):
-        self.process.terminate()
-                </code></pre>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-            </div>
-            <div class="col">
-                <h2>Conclusion</h2>
-                In this tutorial we showed the first step to make your own environment in Godot Engine and use it from python script.
-                Right now the godot environment runs in the real time. In the next tutorial we will show how to speed it up.
-                The fully functional code for this tutorial can be found here: <br><br>
-                <a href="https://github.com/lupoglaz/GodotGymAI/tree/master/Tutorials/InvPendulumTut">Tutorials</a><br><br>
-                The Godot project is located in the directory <b>InvPendulum</b> and the python Gym class is in the file <b>InvPendulum.py</b>.
-
+                <h2>Result</h2>
+                In the end, you'll see something like this:
+                <video width="800" height="600" controls>
+                    <source src="Fig/TrainingResult.webm" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
                 <br>
                 <br>
                 <br>

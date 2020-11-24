@@ -21,19 +21,19 @@ This script does several things:
 3. Compiles x11 export template, dev tools and server templates
 4. Installs python module **GodotEnv** that is used to communicate with the engine.
 
-## Examples
-There are several example environments in the directory **Tutorials**:
+## Docs
+[InvPendulum](https://lupoglaz.github.io/GodotGymAI/tutorial_basic.html)
+tutorial shows how to make an environment, speed up its execution, train a model and deploy back to the engine.
 
-**InvPendulum** shows the example of environment that relies heavily on the physics engine
-
-**LunarLander** more complex example that shows how to randomize environment upon reset
-
-## Tutorial and API
-[Tutorial](https://lupoglaz.github.io/GodotGymAI/tutorial.html)
-
-[API](https://lupoglaz.github.io/GodotGymAI/API.html)
+[API](https://lupoglaz.github.io/GodotGymAI/API.html) lists classes and function in python and godot.
 
 # TODO
-1. **Models deployment**: add module to load your traced model into godot engine
-2. **Learning from pixels**: passing godot viewport rendering as a torch tensor
-3. **Complete tutorial**: tutorial about complete workflow, from empty godot project to training to deployment
+Resolve the bug: 
+handle_crash: Program crashed with signal 11
+Dumping the backtrace. Please include this when reporting the bug on https://github.com/godotengine/godot/issues
+[1] /lib/x86_64-linux-gnu/libc.so.6(+0x46210) [0x7f79ead5a210] (??:0)
+[2] ./InvPendulum.x86_64() [0x812e16] (/usr/include/c++/9/bits/basic_string.h:2301)
+[3] ./InvPendulum.x86_64() [0x63942e] (/home/lupoglaz/Projects/godot/./core/os/memory.h:119)
+
+
+

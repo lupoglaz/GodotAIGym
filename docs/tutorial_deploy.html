@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <title>Godot AI Gym</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://getbootstrap.com/docs/4.1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/tmp.css" rel="stylesheet">
+
+    <script src="js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand" href="https://github.com/lupoglaz/GodotAIGym">GitHub</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="index.html">Home<span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item active">
+            <a class="nav-link" href="API.html">API<span class="sr-only"></span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="tutorial_basic.html">Tutorial<span class="sr-only">(current)</span></a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+<main role="main" class="container-fluid">
+    <div class="starter-template">
+        <h1>Deployment tutorial</h1>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                <h2>Tracing the model</h2>
+                During the test phase, we have no need for the critic network. We only need to convert policy model to jit. This is 
+                extremely simple task, <b>Code1</b> basically shows how to do this. If you have more complicated model that contain 
+                non-torch operations, like python if-statements, there's a great <a https://pytorch.org/tutorials/beginner/Intro_to_TorchScript_tutorial.html>tutorial</a>.
+                <br><br><br>
+            </div>
+            <div class="col">
+                <h5>Code 1: Tracing the policy model (test.py).</h5>
+                <pre class="pre"><code class="python">
+num_states = env.observation_space.shape[0]
+num_actions = env.action_space.shape[0]
+policy = Actor(num_states, num_actions)
+policy.load_state_dict(torch.load('./policy.pkl'))
+
+state = env.reset()
+state = state.to(dtype=torch.float32)
+
+traced_policy = torch.jit.trace(policy, state)
+traced_policy.save('ddpg_policy.jit')                
+</code></pre>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h5>Figure 1: Loading jit model</h5>
+                <img src="Fig/loading_jit.png" class="rounded mx-auto d-block float-center" alt="Annotated scene" width=50%>
+                <h5>Figure 2: Saving resource</h5>
+                <img src="Fig/save_tres.png" class="rounded mx-auto d-block float-center" alt="Annotated scene" width=50%>
+            </div>
+            <div class="col">
+                <h2>Using the model from Godot</h2>
+                First copy the file containing your traced model(<b>ddpg_policy.jit</b> in our case) to your project. By double clicking
+                it (Figure1) the resource loader <b>cTorchModelLoader</b> will convert this file into resource <b>cTorchModelData</b>. Then save this resource 
+                into <b>ddpg_policy.tres</b>(Figure2). It basically stores the entire file into PoolByteArray. 
+                We need this to during the export of the project, because in this 
+                case Godot takes care of appending the file to the final binary or putting it into pck.<br><br>
+                Now we can use <b>Code2</b> to load and run the model. Notice, that we multiply the policy output by 8.0, because 
+                during the training we normalized our environment and this normalization coefficient did not appear in the policy model
+                during the tracing.
+                <br><br><br>
+            </div>
+            <div class="col">
+                <h5>Code 2: DDPG training cycle (main.py)</h5>
+                <pre class="pre"><code class="python">
+onready var policy_data = load("res://ddpg_policy.tres")
+var policy
+var policy_action
+...
+func _physics_process(delta):                
+    if timeout:
+        if mem.exists():
+            ...
+        else:
+            if policy_action != null:
+                agent_action = policy_action
+            agent_action[0]*=8.0
+
+func _on_Timer_timeout():
+    ...
+    if mem.exists():
+        ...
+    else:
+        policy_action = policy.run(observation)
+            </code></pre>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                <h2>Shared libraries</h2>
+                Right now libtorch, that we use to load and execute the jit models is linked as a shared library. 
+                So you will need to copy some .so files from libtorch directory to the directory where you distribute your game.
+                We will change that as soon as <a href="https://github.com/pytorch/pytorch/issues/21737">this issue</a> with 
+                the static linking of libtorch is resolved.<br><br><br>
+            </div>
+            <div class="col">
+            </div>
+        </div>
+        <div class="row">
+                <div class="col">
+                </div>
+                <div class="col">
+                </div>
+                <div class="col">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                <h2>Result</h2>
+                If everything is done correctly, you should see this:
+                <video width="800" height="600" controls>
+                    <source src="Fig/ExportResult.webm" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <br>
+                <br>
+                <br>
+                <br>
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div><!-- /.container -->
+</main>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="https://getbootstrap.com/docs/4.1/assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="https://getbootstrap.com/docs/4.1/assets/js/vendor/popper.min.js"></script>
+<script src="https://getbootstrap.com/docs/4.1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
