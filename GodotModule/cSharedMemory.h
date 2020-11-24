@@ -32,12 +32,6 @@ typedef allocator<int, managed_shared_memory::segment_manager>  ShmemAllocator;
 typedef std::vector<int, ShmemAllocator> IntVector;
 typedef std::vector<float, ShmemAllocator> FloatVector;
 
-
-struct TensorDescription{
-    std::string type;       //Tensor scalar type
-    TensorDescription(const std::string &t_type):type(t_type){}
-};
-
 class cSharedMemory : public Reference {
     GDCLASS(cSharedMemory, Reference);
 

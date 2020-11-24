@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <title>Godot AI Gym</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://getbootstrap.com/docs/4.1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/tmp.css" rel="stylesheet">
+
+    <script src="js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand" href="https://github.com/lupoglaz/GodotGymAI">GitHub</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="index.html">Home<span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item active">
+            <a class="nav-link" href="API.html">API<span class="sr-only"></span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="tutorial.html">Tutorial<span class="sr-only">(current)</span></a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+<main role="main" class="container-fluid">
+    <div class="starter-template">
+        <h1>Tutorial</h1>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <h5>Figure1: Project settings.</h5>
+                <img src="Fig/VsyncSettings.png" class="rounded mx-auto d-block float-center" alt="Training process" width=80%>
+                <img src="Fig/PhysicsSettings.png" class="rounded mx-auto d-block float-center" alt="Training process" width=80%>
+            </div>
+            <div class="col">
+                <h2>Internal clock</h2>
+                Imagine, that you want to simulate phyics in godot engine with the timestep <b>target_delta</b>. Normally it should be 
+                smaller than <b>deltat</b>, that we used in the previous tutorial. In this case we perform <b>deltat</b>/<b>target_delta</b>
+                physics iterations between getting an action and returning the observation. The engine usually assumes that <b>target_delta</b> and 
+                <b>deltat</b> correspond to the real time. However, we want to set the scale to the fastest possible, that you can get set 
+                using <b>Engine.set_time_scale</b>. The time scale corresponding to the real clock is 1, but we want each frame to perform physics 
+                step with <b>target_delta</b> time step. In this case we have to set the time scale to FPS*<b>target_delta</b>.<br><br>
+                Measuring FPS is a tricky part, because when we are waiting for the next action, the system clock does not stop and the engine 
+                thinks that the frame takes the time spent in python script. <br><br>
+                Code 1 shows how to mitigate this problem. First we measure the time it takes to free <b>sem_action</b> semaphore. 
+                We also measure FPS manually in the <b>_process</b> function and remove the semaphore time from our FPS estimate. Then 
+                we set engine iterations per second to our estimate and adjust time scale correspondingly. After this we have to zero the 
+                <b>sem_time</b>, so that it does not affect the frames where there's no communication between godot and python.<br><br>
+                We designed two unit tests to check that the resulting time scaling does not affect the result of the physics simulation. 
+                One can find them here: <a href="https://github.com/lupoglaz/GodotGymAI/tree/master/UnitTests">Tests</a>. <br><br>
+                Finally, you need to set Vsync off and physics timestep to fixed (Figure1).
+
+            </div>
+            <div class="col">
+                <h5>Code 1: Example of time scaling.</h5>
+                <pre class="pre"><code class="python">
+var deltat = 0.05
+var prev_time = 0.0
+var sem_delta = 0.0
+var target_delta = 0.025
+
+func _physics_process(delta):
+    if timeout:
+        if mem.exists():
+            var time_start = OS.get_ticks_usec()
+            sem_action.wait()
+            var time_end = OS.get_ticks_usec()
+            sem_delta = time_end - time_start
+            ...
+
+func _process(delta):
+    if mem.exists():
+        var cur_time = OS.get_ticks_usec()
+        var fps_est = 1000000.0/(cur_time - prev_time - sem_delta)
+        Engine.set_iterations_per_second(fps_est)
+        Engine.set_time_scale(Engine.get_iterations_per_second()*target_delta)
+        sem_delta = 0.0
+        prev_time = cur_time
+                </code></pre>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <h5>Figure2: Server export templates.</h5>
+                <img src="Fig/ServerTemplates.png" class="rounded mx-auto d-block float-center" alt="Training process" width=80%>
+            </div>
+            <div class="col">
+                <h2>Server export</h2>
+                When one debugs the environment, there's usually no need for rendering during the training. Using server export presets can 
+                speed up the execution of the environment. When the installation script runs, it also compiles this preset, so you only need
+                to export the project using them.<br><br><br><br>
+            </div>
+            <div class="col">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                <h2>Parallelization in Python</h2>
+                For some algorithms, like PPO we can use one policy to get multiple samples of the environment. In this case 
+                it's useful to do it in parallel. There are two options: implementing parallelism in the engine, by spawning 
+                several copies of the environment scene or launching several godot processes from python. However, we haven't yet
+                tested it: you might encounter the problem with semaphore or shared memory handle naming problem. In particular when 
+                multiple processes use the same shared memory and semaphores.<br><br><br><br>
+            </div>
+            <div class="col">
+            </div>
+        </div>
+        
+    </div><!-- /.container -->
+</main>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="https://getbootstrap.com/docs/4.1/assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="https://getbootstrap.com/docs/4.1/assets/js/vendor/popper.min.js"></script>
+<script src="https://getbootstrap.com/docs/4.1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -9,7 +9,8 @@ from pathlib import Path
 GODOT_PATH = os.environ["GODOT_PATH"]
 
 def download_unpack(rewrite=False):
-	url = 'https://download.pytorch.org/libtorch/cu102/libtorch-cxx11-abi-shared-with-deps-1.7.0.zip'
+	# url = 'https://download.pytorch.org/libtorch/cu102/libtorch-cxx11-abi-shared-with-deps-1.7.0.zip'
+	url = 'https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.7.0%2Bcpu.zip'
 	if (not Path('libtorch.zip').exists()) or rewrite:
 		print('Downloading libtorch')
 		filedata = request.urlopen(url)
@@ -44,8 +45,9 @@ def install_python_module():
 	os.chdir(current_path)
 
 if __name__=='__main__':
-	download_unpack(rewrite=True)
+	# download_unpack(rewrite=False)
 	install_module(godot_root=GODOT_PATH, rewrite=True)
 	install_python_module()
 	compile_godot(godot_root=GODOT_PATH, platform='x11', tools='yes', target='release_debug', bits=64)
-	compile_godot(godot_root=GODOT_PATH, platform='server', tools='no', target='release_debug', bits=64)
+	# compile_godot(godot_root=GODOT_PATH, platform='x11', tools='no', target='release_debug', bits=64)
+	# compile_godot(godot_root=GODOT_PATH, platform='server', tools='no', target='release_debug', bits=64)

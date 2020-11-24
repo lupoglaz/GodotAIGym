@@ -7,7 +7,6 @@ var sem_action
 var sem_observation
 var sem_reset
 var mem
-#onready var policy_data = preload("res://ddpg_policy.jit")
 onready var policy_data = load("res://ddpg_policy.tres")
 var policy
 var policy_action
@@ -34,6 +33,7 @@ func _ready():
 		sem_observation.init("sem_observation")
 		print("Running as OpenAIGym environment")
 	else:
+		#pass
 		policy = cTorchModel.new()
 		policy.set_data(policy_data)
 		
@@ -88,7 +88,7 @@ func _physics_process(delta):
 				env_action[1] = 1
 			if policy_action != null:
 				agent_action = policy_action
-				agent_action[0]*=8.0
+			agent_action[0]*=8.0
 		
 		$ActionLabel.text = "Action: "+str(agent_action)
 		
@@ -116,6 +116,7 @@ func _on_Timer_timeout():
 		mem.sendIntArray("done", [is_done()])
 		sem_observation.post()
 	else:
+		#pass
 		policy_action = policy.run(observation)
 	
 	time_elapsed += deltat

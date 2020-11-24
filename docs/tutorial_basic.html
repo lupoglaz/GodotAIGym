@@ -53,21 +53,21 @@
             <div class="col">
                 <h2>Introduction</h2>
                 When training reinforcement learning agents, the agent interacts with the environment by sending actions and receiving observations.
-                The agents are trained in the python script and the environment is implemented using Godot. <br>
+                The agents are trained in a python script and the environment is implemented using Godot. <br>
                 In python the environment is wrapped into a class, that is usually similar to OpenAI Gym environment class (Code 1). We need to implement 
                 the functions: <b>init</b>, <b>step</b>, <b>reset</b> and <b>close</b> to get fully functional environment. <br><br>
                 The <b>init</b> function launches subprocesses associated with your environment. In our case it launches Godot 
                 project as a subprocess.<br>
                 The <b>step</b> function takes an action tensor that was sampled from your model and passes it to the environment. It then computes 
                 the next state and returns the observation of this state along with the reward. The variable <b>done</b> is <b>true</b> if the new state is the 
-                final one, <b>true</b> otherwise.<br>
-                The <b>reset</b> function returns the environment to the initial state and return the observation of this state.<br>
-                The <b>close</b> function closes any subprocesses associated with your environment.<br>
+                final one, <b>false</b> otherwise.<br>
+                The <b>reset</b> function returns the environment to the initial state and returns the observation of this state.<br>
+                The <b>close</b> function closes all subprocesses associated with your environment.<br>
                 We will ignore <b>seed</b> and <b>render</b> functions for now, because we use random number generator in Godot 
                 and rendering is done by default.<br>
             </div>
             <div class="col">
-                <h5>Code 1: Dummy implementation of OpenAI Gym class.</h5>
+                <h5>Code 1: Dummy implementation of an OpenAI Gym class.</h5>
                 <pre class="pre"><code class="python">
 class DummyEnv(gym.Env):
     def __init__(self):
@@ -135,8 +135,8 @@ env.close()
                 When the <b>step</b> function is called the action tensor is sent into the shared memory and <b>sem_act</b> semaphore
                 turns green. It signals to godot to start processing the action of an agent. Meanwhile the semaphore <b>sem_obs</b> turns
                 red, blocking python process while waiting for godot to send the observation.<br>
-                In Godot we have to pay additional attention to server process to make sure physics server is synchronized with the 
-                semaphores.
+                In Godot we have to put synchronization procedures in a <b>_physics_process</b> if we have physics-based environment. In other cases 
+                we can use standard <b>_process</b> function.
             </div>
             <div class="col">
                 <h5>Code 3: Introducing semaphores.</h5>
@@ -192,12 +192,7 @@ class DummyEnvSemaphores(gym.Env):
                     The engine waits for the actions in the function <b>_physics_process</b> and starts <b>Timer</b> count down. <br>
                     When the <b>Timer</b> returns the signal <b>_on_Timer_timeout</b> we send the observation back to python and release the 
                     semaphore <b>sem_obs</b>. Also, we signal to the engine, that we wait for the next action by setting <b>timeout</b> variable to true.
-                    <br><br>
-                    We generally want the training to be as fast as possible, so we need to make the engine process faster than real time. It is done 
-                    by setting the <b>iterations_per_second</b> property of the engine to the FPS and increasing the timescale to some fraction of 
-                    the <b>iterations_per_second</b>. We use only fraction of the FPS, because we want the engine to 
-                    perform with reasonably low delta, such that 
-                    there are no obvious bugs in the physics. I can not guarantee that this way of increasing the processing speed is valid though.
+                    <br>
                 </div>
                 <div class="col">
                     <h5>Code 4: Environment node script</h5>
@@ -214,10 +209,7 @@ func _ready():
     set_physics_process(true)
 
 func _physics_process(delta):
-    if timeout:
-        Engine.iterations_per_second = max(60, Engine.get_frames_per_second())
-        Engine.time_scale = max(1.0, Engine.iterations_per_second/100.0)
-    
+    if timeout:    
         if mem.exists():
             sem_action.wait()
             agent_action = mem.getIntArray("agent_action")
@@ -244,11 +236,11 @@ func _on_Timer_timeout():
                 When the episode of the simulation ends we want to reset the environment to the initial position without relaunching 
                 the engine process. To accomplish this feat we use additional action, that is 1 if the environment should be reset and 
                 0 otherwise. However, the tricky part is resetting the positions and velocities of the objects in Godot.<br>
-                In our case we have one physics object: <b>RigidBody2D</b>. The positions and velicities of the <b>RigidBody2D</b> node can be changed
+                In our case we have one physics object: <b>RigidBody2D</b>. The positions and velocities of the <b>RigidBody2D</b> node can be changed
                 only in the <b>_integrate_forces</b> function of this node. Therefore we introduce the variable <b>reset</b>, which is true when we 
                 want to reinitialize this node and false otherwise. Additionally we create variables to store initial positions and velocities of this node.<br>
                 The Code 5 shows the gist of this function. First we compute absolute initial <b>Transform2D</b> of the node and change the state accordingly.<br>
-                Unfortunatelly, we have to compute the transforms of <b>Anchor</b> and <b>PinJoint2D</b> tranforms in the <b>Environment</b> script (Code 6).
+                Unfortunatelly, we have to compute the transforms of <b>Anchor</b> and <b>PinJoint2D</b> in the <b>Environment</b> script (Code 6).
                 Probably, one can avoid this cumbersome procedure by reorganizing the tree or accessing the parent nodes from the <b>RigidBody2D</b> itself.
             </div>
             <div class="col">
@@ -303,9 +295,9 @@ func _ready():
 class DummyEnvLaunch(gym.Env):
     def __init__(self, exec_path, env_path):
         with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
-            self.process = subprocess.Popen([exec_path, 
-            "--path", os.path.abspath(env_path),
-            "--handle", "environment"], stdout=out, stderr=err)
+            self.process = subprocess.Popen([exec_path, "--path", 
+            os.path.abspath(env_path), 
+            "--handle", self.handle], stdout=out, stderr=err)
                 
         atexit.register(self.close)
     
@@ -319,9 +311,10 @@ class DummyEnvLaunch(gym.Env):
             </div>
             <div class="col">
                 <h2>Conclusion</h2>
-                In this tutorial we showed the main steps to make your own environment in Godot Engine and use it from python script. 
+                In this tutorial we showed the first step to make your own environment in Godot Engine and use it from python script.
+                Right now the godot environment runs in the real time. In the next tutorial we will show how to speed it up.
                 The fully functional code for this tutorial can be found here: <br><br>
-                <a href="https://github.com/lupoglaz/GodotGymAI/tree/master/Environments">Environments</a><br><br>
+                <a href="https://github.com/lupoglaz/GodotGymAI/tree/master/Tutorials/InvPendulumTut">Tutorials</a><br><br>
                 The Godot project is located in the directory <b>InvPendulum</b> and the python Gym class is in the file <b>InvPendulum.py</b>.
 
                 <br>
