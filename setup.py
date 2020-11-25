@@ -45,9 +45,9 @@ def install_python_module():
 	os.chdir(current_path)
 
 if __name__=='__main__':
-	# download_unpack(rewrite=False)
+	download_unpack(rewrite=False)
 	install_module(godot_root=GODOT_PATH, rewrite=True)
 	install_python_module()
 	compile_godot(godot_root=GODOT_PATH, platform='x11', tools='yes', target='release_debug', bits=64)
-	# compile_godot(godot_root=GODOT_PATH, platform='x11', tools='no', target='release_debug', bits=64)
-	# compile_godot(godot_root=GODOT_PATH, platform='server', tools='no', target='release_debug', bits=64)
+	compile_godot(godot_root=GODOT_PATH, platform='x11', tools='no', target='release_debug', bits=64)
+	compile_godot(godot_root=GODOT_PATH, platform='server', tools='no', target='release_debug', bits=64)
