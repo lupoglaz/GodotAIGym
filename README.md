@@ -22,10 +22,10 @@ This script does several things:
 4. Installs python module **GodotEnv** that is used to communicate with the engine.
 
 ## Docs
-[InvPendulum](https://lupoglaz.github.io/GodotGymAI/tutorial_basic.html)
+[InvPendulum](https://lupoglaz.github.io/GodotAIGym/tutorial_basic.html)
 tutorial shows how to make an environment, speed up its execution, train a model and deploy back to the engine.
 
-[API](https://lupoglaz.github.io/GodotGymAI/API.html) lists classes and function in python and godot.
+[API](https://lupoglaz.github.io/GodotAIGym/API.html) lists classes and function in python and godot.
 
 # TODO
 Resolve the bug: 
