@@ -8,7 +8,9 @@ Make your Godot project into OpenAI Gym environment to train RL models with PyTo
 1. Godot Engine version >= 3.2 compiled from source
 2. Boost interprocess (apt install libboost-container-dev libboost-system-dev libboost-locale-dev)
 3. Pytorch version >= 1.5
+4. OpenAI Gym
 4. Python setuptools
+
 
 ## Installation
 First, in **setup.py** change the variable **GODOT_PATH** to the root directory of godot engine source. Then run:
