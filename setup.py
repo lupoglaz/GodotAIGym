@@ -19,10 +19,9 @@ def download_unpack(rewrite=False):
 		with open('libtorch.zip', 'wb') as f:
 			f.write(datatowrite)
 
-	if (not Path('GodotModule/libtorch').exists()) or rewrite:
-		print('Extracting libtorch')
-		with ZipFile('libtorch.zip', 'r') as zipObj:
-   			zipObj.extractall(path='GodotModule')
+	print('Extracting libtorch')
+	with ZipFile('libtorch.zip', 'r') as zipObj:
+		zipObj.extractall(path='GodotModule')
 	
 
 def compile_godot(godot_root, platform='x11', tools='yes', target='release_debug', bits=64):
