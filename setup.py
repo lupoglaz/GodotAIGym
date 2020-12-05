@@ -1,7 +1,7 @@
 import os
 import sys
 import argparse
-from shutil import copyfile, copytree, rmtree
+from shutil import copyfile, copytree, rmtree, which
 from urllib import request
 from zipfile import ZipFile
 from pathlib import Path
@@ -44,7 +44,10 @@ def install_module(godot_root, rewrite=False):
 def install_python_module():
 	current_path = os.getcwd()
 	os.chdir('PythonModule')
-	os.system('python setup.py install --user')
+	python_command = 'python'
+	if which(python_command) is None:
+		python_command += '3'
+	os.system(python_command + ' setup.py install --user')
 	os.chdir(current_path)
 
 if __name__=='__main__':
