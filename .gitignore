@@ -45,3 +45,7 @@
 *.exe
 *.out
 *.app
+
+# LibTorch
+libtorch.zip
+GodotModule/libtorch
