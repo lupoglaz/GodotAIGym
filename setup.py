@@ -12,6 +12,7 @@ def download_unpack(rewrite=False):
 	# url = 'https://download.pytorch.org/libtorch/cu102/libtorch-cxx11-abi-shared-with-deps-1.7.0.zip'
 	url = 'https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.7.0%2Bcpu.zip'
 	if (not Path('libtorch.zip').exists()) or rewrite:
+		rmtree('GodotModule/libtorch')
 		print('Downloading libtorch')
 		filedata = request.urlopen(url)
 		datatowrite = filedata.read()
