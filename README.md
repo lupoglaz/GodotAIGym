@@ -5,7 +5,7 @@
 Make your Godot project into OpenAI Gym environment to train RL models with PyTorch. This project only runs on Linux systems.
 
 ## Requirements
-1. Godot Engine version >= 3.2 compiled from source
+1. Godot Engine version >= 3.2 compiled from source (see [compiling requirements](https://docs.godotengine.org/en/stable/development/compiling/) for your platform)
 2. Boost interprocess (apt install libboost-container-dev libboost-system-dev libboost-locale-dev)
 3. Pytorch version >= 1.5
 4. OpenAI Gym
