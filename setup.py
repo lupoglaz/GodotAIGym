@@ -27,7 +27,7 @@ def download_unpack(rewrite=False):
 def compile_godot(godot_root, platform='x11', tools='yes', target='release_debug', bits=64):
 	current_path = os.getcwd()
 	os.chdir(godot_root)
-	os.system(f"scons platform={platform} tools={tools} target={target} bits={bits}")
+	os.system(f"scons -j `nproc` platform={platform} tools={tools} target={target} bits={bits}")
 	os.chdir(current_path)
 
 def install_module(godot_root, rewrite=False):
