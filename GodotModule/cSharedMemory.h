@@ -28,9 +28,70 @@ using namespace torch::indexing;
 
 using namespace boost::interprocess;
 
-typedef allocator<int, managed_shared_memory::segment_manager>  ShmemAllocator;
-typedef std::vector<int, ShmemAllocator> IntVector;
-typedef std::vector<float, ShmemAllocator> FloatVector;
+typedef allocator<int, managed_shared_memory::segment_manager>  ShmemAllocatorInt;
+typedef allocator<float, managed_shared_memory::segment_manager>  ShmemAllocatorFloat;
+typedef std::vector<int, ShmemAllocatorInt> IntVector;
+typedef std::vector<float, ShmemAllocatorFloat> FloatVector;
+
+class cPersistentIntTensor : public Reference{
+    GDCLASS(cPersistentIntTensor, Reference);
+
+	private:
+		IntVector *vector = NULL;
+		int size;
+
+    protected:
+        static void _bind_methods();
+
+	public:
+		cPersistentIntTensor(IntVector *_vector){
+			vector = _vector;
+			size = _vector->size();
+		}
+		~cPersistentIntTensor(){}
+		void write(const PoolVector<int> &array){
+            // print_line(String("Write int vector:"+String(String::num_int64(size))));
+			for(int i=0; i<size; i++)
+				(*vector)[i] = array[i];
+		};
+		PoolVector<int> read(){
+            // print_line(String("Read int vector:"+String(String::num_int64(size))));
+            PoolVector<int> data;
+			for(int i=0; i<size; i++)
+				data.push_back( (*vector)[i] );
+			return data;
+		}
+		
+};
+class cPersistentFloatTensor : public Reference {
+    GDCLASS(cPersistentFloatTensor, Reference);
+
+	private:
+		FloatVector *vector = NULL;
+		int size;
+
+    protected:
+        static void _bind_methods();
+
+	public:
+		cPersistentFloatTensor(FloatVector *_vector){
+			vector = _vector;
+			size = _vector->size();
+		}
+		~cPersistentFloatTensor(){}
+		void write(const PoolVector<float> &array){
+            // print_line(String("Write float vector:"+String(String::num_int64(size))));
+			for(int i=0; i<size; i++)
+				(*vector)[i] = array[i];
+		}
+		PoolVector<float> read(){
+            // print_line(String("Read float vector:"+String(String::num_int64(size))));
+			PoolVector<float> data;
+			for(int i=0; i<size; i++)
+				data.push_back( (*vector)[i] );
+			return data;
+		}
+};
 
 class cSharedMemory : public Reference {
     GDCLASS(cSharedMemory, Reference);
@@ -48,6 +109,9 @@ protected:
 public:
     cSharedMemory();
     ~cSharedMemory();
+
+    Ref<cPersistentFloatTensor> findFloatTensor(const String &name);
+    Ref<cPersistentIntTensor> findIntTensor(const String &name);
 
     PoolVector<int> getIntArray(const String &name);
     PoolVector<float> getFloatArray(const String &name);
@@ -70,22 +134,23 @@ class cSharedMemorySemaphore : public Reference {
     public:
         cSharedMemorySemaphore(){;};
         ~cSharedMemorySemaphore(){
-            shared_memory_object::remove(name->c_str());
+            //shared_memory_object::remove(name->c_str());
             delete region;
             delete name;
+            delete mutex;
         };
         void init(const String &sem_name){
             
             std::wstring ws = sem_name.c_str();
-	        std::string s_name( ws.begin(), ws.end() );
+	    std::string s_name( ws.begin(), ws.end() );
             name = new std::string(s_name);
             // std::cout<<"Constructing semaphore "<<*name<<std::endl;
             try{
                 shared_memory_object object(open_only, name->c_str(), read_write);
                 region = new mapped_region(object, read_write);
             }catch(interprocess_exception &e){
-                std::cout<<*name<<":"<<boost::diagnostic_information(e)<<std::endl;
-                shared_memory_object::remove(name->c_str());
+                print_line(String("cSharedMemorySemaphore:init:")+String((*name).c_str())+String(":")+String(boost::diagnostic_information(e).c_str()));
+                //shared_memory_object::remove(name->c_str());
             }
             // std::cout<<"Constructed semaphore "<<*name<<std::endl;
         };
