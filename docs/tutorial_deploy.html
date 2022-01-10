@@ -98,6 +98,12 @@ traced_policy.save('ddpg_policy.jit')
 onready var policy_data = load("res://ddpg_policy.tres")
 var policy
 var policy_action
+func _ready():
+    if mem.exists():
+        ...
+    else:
+        policy = cTorchModel.new()
+        policy.set_data(policy_data)
 ...
 func _physics_process(delta):                
     if timeout:

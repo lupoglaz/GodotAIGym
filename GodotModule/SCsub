@@ -22,10 +22,17 @@ torch_libdirs = [
 
 #torch_libnames_cpu = ["boost_system", "stdc++", "m", "torch", "caffe2", "c10", "pthread", "dl", "rt", "X11"]
 torch_libnames_cpu = ["boost_system", "stdc++", "m", "torch_cpu", "torch", "c10", "pthread", "dl", "rt", "X11"]
-#torch_libnames_cpu = [  "boost_system", "stdc++", "m", 
-#                        "clog", "cpuinfo", "libprotobuf", "libprotoc", "onnx_proto", "onnx", "c10", "fbgemm", "dnnl", "foxi_loader", "caffe2_protos", 
-#                        "Caffe2_perfkernels_avx", "Caffe2_perfkernels_avx2", "Caffe2_perfkernels_avx512",
-#                        "pthread", "dl", "rt", "X11"]
+
+torch_libnames_cpu += ["fbgemm", "nnpack", "asmjit", "benchmark", "benchmark_main", "c10d",
+			"Caffe2_perfkernels_avx",  "Caffe2_perfkernels_avx2", "Caffe2_perfkernels_avx512", "caffe2_protos",
+			"clog", "cpuinfo", "dnnl", "gloo", "gmock", "gmock_main", "nnpack_reference_layers", "onnx",
+			"onnx_proto", "protobuf", "protobuf-lite", "qnnpack", "tensorpipe", "tensorpipe_uv", "XNNPACK",
+			"cpuinfo_internals", "foxi_loader", "gtest", "gtest_main", "mkldnn", "protoc", "pthreadpool",
+			"pytorch_qnnpack"]
+torch_libnames_cpu += ["pytorch_jni", "shm", "torchbind_test", "torch_global_deps", "caffe2_detectron_ops",
+			"caffe2_observers", "jitbackend_test", "fmt", "fbjni", "caffe2_module_test_dynamic"
+			#"torch_python", "process_group_agent", "tensorpipe_agent", "gomp-7c85b1e2",
+			]
 
 env_sum = env.Clone()
 env_sum.Append(LINKFLAGS=['-Wl,--no-undefined', '-Wl,--no-as-needed'])
@@ -34,6 +41,7 @@ env_sum.Append(LIBPATH=torch_libdirs)
 env_sum.Append(RPATH=torch_rlibdirs)
 env_sum.Append(LIBS=torch_libnames_cpu)
 env_sum.Append(CPPDEFINES={'-D_GLIBCXX_USE_CXX14_ABI' : 0 })
+env_sum.Append(CPPDEFINES={'-D_GLIBCXX_USE_CXX11_ABI' : 0 })
 env_sum.Append(CXXFLAGS=['-O2', '-Wall', '-std=gnu++14', '-fPIC'])
 
 src_list = ["cSharedMemory.cpp", "register_types.cpp"]

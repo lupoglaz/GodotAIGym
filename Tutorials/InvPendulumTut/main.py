@@ -19,9 +19,8 @@ if __name__ == '__main__':
 	num_eval = 0
 	buffer_length = 600000
 
-	# env = NormalizedEnv(gym.make('Pendulum-v0'))
-	GODOT_BIN_PATH = "InvPendulum/InvPendulum.server.x86_64"
-	env_abs_path = "InvPendulum/InvPendulum.server.pck"
+	GODOT_BIN_PATH = "InvPendulum/InvPendulum.x86_64"
+	env_abs_path = "InvPendulum/InvPendulum.pck"
 	env = NormalizedEnv(InvPendulumEnv(exec_path=GODOT_BIN_PATH, env_path=env_abs_path))
 
 	ddpg = DDPG(env)
@@ -29,7 +28,6 @@ if __name__ == '__main__':
 	logger.clean()
 	buffer = ReplayBuffer(buffer_length)
 	state = env.reset()
-	# state = torch.from_numpy(state).to(dtype=torch.float32, device='cuda')
 	state = state.to(dtype=torch.float32, device='cuda')
 
 	noise = OrnsteinUhlenbeckProcess()
@@ -49,9 +47,7 @@ if __name__ == '__main__':
 		else:
 			action = ddpg.select_action(state, noise)
 
-		# state_next, reward, term, _ = env.step(action.cpu().numpy())
 		state_next, reward, term, _ = env.step(action.cpu())
-		# state_next = torch.from_numpy(state_next).to(dtype=state.dtype, device=state.device)
 		state_next = state_next.to(dtype=state.dtype, device=state.device)
 		buffer.append(state, action, reward, state_next, term)
 
@@ -71,7 +67,6 @@ if __name__ == '__main__':
 
 		if term:
 			state = env.reset()
-			# state = torch.from_numpy(state).to(dtype=torch.float32, device='cuda')
 			state = state.to(dtype=torch.float32, device='cuda')
 			noise.reset_states()
 			print(f'Step: {training_step} / Episode: {episode} / Score: {np.sum(rewards)}')

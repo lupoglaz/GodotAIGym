@@ -41,11 +41,17 @@ class InvPendulumEnv(gym.Env):
 		Terminated after 10s
 	"""
 
-	def __init__(self, exec_path, env_path, render=False):
+	def __init__(self, exec_path, env_path, num_actions=1, num_observations=3, render=True):
 		self.handle = "environment"
 		self.mem = _GodotEnv.SharedMemoryTensor(self.handle)
 		self.sem_act = _GodotEnv.SharedMemorySemaphore("sem_action", 0)
 		self.sem_obs = _GodotEnv.SharedMemorySemaphore("sem_observation", 0)
+
+		self.agent_action_tensor = self.mem.newFloatTensor("agent_action", num_actions)
+		self.env_action_tensor = self.mem.newIntTensor("env_action", 2)
+		self.observation_tensor = self.mem.newFloatTensor("observation", num_observations)
+		self.reward_tensor = self.mem.newFloatTensor("reward", 1)
+		self.done_tensor = self.mem.newIntTensor("done", 1)
 
 		#Important: if this process is called with subprocess.PIPE, the semaphores will be stuck in impossible combination
 		with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
@@ -65,9 +71,8 @@ class InvPendulumEnv(gym.Env):
 		self.max_torque = 8.0
 		self.max_speed = 8
 
-		high = np.array([1., 1., self.max_speed])
-		self.action_space = spaces.Box(low=-self.max_torque, high=self.max_torque, shape=(1,), dtype=np.float32)
-		self.observation_space = spaces.Box(low=-high, high=high, dtype=np.float32)
+		self.action_space = spaces.Box(low=-self.max_torque, high=self.max_torque, shape=(num_actions,), dtype=np.float32)
+		self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(num_observations,), dtype=np.float32)
 
 		atexit.register(self.close)
 
@@ -75,39 +80,28 @@ class InvPendulumEnv(gym.Env):
 		pass
 
 	def step(self, action):
-		# print("Sending action")
 		action = torch.clamp(action, min=-self.max_torque, max=self.max_torque)
-		self.mem.sendFloat("agent_action", action)
-		self.mem.sendInt("env_action", self.env_action)
+		self.agent_action_tensor.write(action.to(dtype=torch.float32))
+		self.env_action_tensor.write(self.env_action)
 		self.sem_act.post()
-		# print("Waiting for observation")
 		
 		self.sem_obs.wait()
-		# print("Reading observation")
-		observation = self.mem.receiveFloat("observation")
-		reward = self.mem.receiveFloat("reward")
-		done = self.mem.receiveInt("done")
-		# print("Read observation")
+		observation = self.observation_tensor.read()
+		reward = self.reward_tensor.read()
+		done = self.done_tensor.read()
 
 		clamp_speed = torch.clamp(observation[2], min=-self.max_speed, max=self.max_speed)
 		observation[2] = clamp_speed
 
 		return observation, reward.item(), done.item(), None
 		
-	def reset(self):
-		# print("Sending reset action")
+	def reset(self, seed=42):
 		env_action = torch.tensor([1, 0], device='cpu', dtype=torch.int)
-		self.mem.sendFloat("agent_action", self.agent_action)
-		self.mem.sendInt("env_action", env_action)
+		self.env_action_tensor.write(env_action)
 		self.sem_act.post()
-		# print("Sent reset action")
 
 		self.sem_obs.wait()
-		# print("Reading observation")
-		observation = self.mem.receiveFloat("observation")
-		reward = self.mem.receiveFloat("reward")
-		done = self.mem.receiveInt("done")
-		# print("Read observation")
+		observation = self.observation_tensor.read()
 		return observation
 		
 
@@ -120,20 +114,25 @@ class InvPendulumEnv(gym.Env):
 
 
 if __name__=='__main__':
-	import gym
-	from gym import spaces
-	from gym.utils import seeding
-	from matplotlib import pylab as plt
-	from gymPendulum import PendulumEnv
+	# import gym
+	# from gym import spaces
+	# from gym.utils import seeding
+	# from matplotlib import pylab as plt
+	# from gymPendulum import PendulumEnv
 	# env = gym.make("Pendulum-v0")
-	env = PendulumEnv()
-	env.reset()
+	# env = PendulumEnv()
+	# env.reset()
 	# env.env.state = np.array([0.0, 1])
 
-	GODOT_BIN_PATH = "InvPendulum/InvPendulum.server.x86_64"
-	env_abs_path = "InvPendulum/InvPendulum.server.pck"
+	GODOT_BIN_PATH = "InvPendulum/InvPendulum.x86_64"
+	env_abs_path = "InvPendulum/InvPendulum.pck"
 	env_my = InvPendulumEnv(exec_path=GODOT_BIN_PATH, env_path=env_abs_path)
-	env_my.reset()
+	for i in range(1000):
+		obs_my, rew_my, done, _ = env_my.step(torch.tensor([8.0]))
+		print(rew_my, obs_my, done)
+	env_my.close()
+	sys.exit()
+	# env_my.reset()
 
 	gym_obs = []
 	gym_rew = []

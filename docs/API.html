@@ -65,66 +65,98 @@
         <div class="row">
             <div class="col" id="SharedMemoryTensor">
                 <script>createHeader("SharedMemoryTensor", "class", "_GodotEnv", "SharedMemoryTensor", "(handle)");</script>
-                Class to manage sending and receiving tensors in shared memory. Handle is a string, that uniquely identifies the 
-                memory.
-                
-                <script>createHeader("SharedMemoryTensor", "function", "SharedMemoryTensor", "sendInt", "(name, tensor)");</script>
-                Sends 1d <b>tensor</b> with the id <b>name</b> to the shared memory.
+                Class to manage shared memory. Handle is a string, that uniquely identifies the memory chunk.
+                <br><br><br><br><br><br><br><br><br><br>
+                <script>createHeader("SharedMemoryTensor", "function", "SharedMemoryTensor", "newIntTensor", "(name, size)");</script>
+                Creates 1d integer tensor with the id <b>name</b> and number of elements <b>size</b> in the shared memory.
                 <script>
                     generate_table("SharedMemoryTensor", 
                                     [
                                         ["name", "CPU", "string", ""], 
-                                        ["tensor", "CPU", "int32", "ndim = 1"]
+                                        ["size", "CPU", "int32", ""]
                                     ],
                                     [
-                                        ["None", "CPU", "", ""], 
+                                        ["Persistent int32 tensor", "CPU", "cPersistentIntTensor", ""], 
                                     ]
                                     );
                 </script>
 
-                <script>createHeader("SharedMemoryTensor", "function", "SharedMemoryTensor", "receiveInt", "(name, tensor)");</script>
-                Retrieves 1d <b>tensor</b> with the id  <b>name</b> from the shared memory.
+                <script>createHeader("SharedMemoryTensor", "function", "SharedMemoryTensor", "newFloatTensor", "(name, size)");</script>
+                Creates 1d float tensor with the id <b>name</b> and number of elements <b>size</b> in the shared memory.
                 <script>
                     generate_table("SharedMemoryTensor", 
                                     [
                                         ["name", "CPU", "string", ""], 
+                                        ["size", "CPU", "int32", ""]
                                     ],
                                     [
-                                        ["tensor", "CPU", "int32", "ndim = 1"]
+                                        ["Persistent float32 tensor", "CPU", "cPersistentFloatTensor", ""]
                                     ]
                                     );
                 </script>
 
-                <script>createHeader("SharedMemoryTensor", "function", "SharedMemoryTensor", "sendFloat", "(name, tensor)");</script>
-                Sends 1d <b>tensor</b> with the id <b>name</b> to the shared memory.
+                <script>createHeader("SharedMemoryTensor", "class", "_GodotEnv", "cPersistentIntTensor", "");</script>
+                Class for reading and writing int32 tensors into shared memory.
+
+                <script>createHeader("SharedMemoryTensor", "function", "cPersistentIntTensor", "read", "()");</script>
+                Reads 1d integer tensor from the shared memory.
                 <script>
                     generate_table("SharedMemoryTensor", 
-                                    [
-                                        ["name", "CPU", "string", ""], 
-                                        ["tensor", "CPU", "float32", "ndim = 1"]
-                                    ],
-                                    [
-                                        ["None", "CPU", "", ""], 
-                                    ]
-                                    );
+                    [
+                        ["None", "", "", ""]
+                    ],
+                    [
+                        ["Tensor", "CPU", "int32", "ndim=1"]
+                    ]
+                    );
                 </script>
 
-                <script>createHeader("SharedMemoryTensor", "function", "SharedMemoryTensor", "receiveFloat", "(name, tensor)");</script>
-                Retrieves 1d <b>tensor</b> with the id  <b>name</b> from the shared memory.
+                <script>createHeader("SharedMemoryTensor", "function", "cPersistentIntTensor", "write", "(tensor)");</script>
+                Writes 1d integer <b>tensor</b> to the shared memory.
                 <script>
                     generate_table("SharedMemoryTensor", 
-                                    [
-                                        ["name", "CPU", "string", ""], 
-                                    ],
-                                    [
-                                        ["tensor", "CPU", "float32", "ndim = 1"]
-                                    ]
-                                    );
+                    [
+                        ["Tensor", "CPU", "int32", "ndim=1"]
+                    ],
+                    [
+                        ["None", "", "", ""] 
+                    ]
+                    );
                 </script>
+
+                <script>createHeader("SharedMemoryTensor", "class", "_GodotEnv", "cPersistentFloatTensor", "");</script>
+                Class for reading and writing float32 tensors into shared memory.
+
+                <script>createHeader("SharedMemoryTensor", "function", "cPersistentFloatTensor", "read", "()");</script>
+                Reads 1d float tensor from the shared memory.
+                <script>
+                    generate_table("SharedMemoryTensor", 
+                    [
+                        ["None", "", "", ""]
+                    ],
+                    [
+                        ["Tensor", "CPU", "float32", "ndim=1"]
+                    ]
+                    );
+                </script>
+
+                <script>createHeader("SharedMemoryTensor", "function", "cPersistentFloatTensor", "write", "(tensor)");</script>
+                Writes 1d float <b>tensor</b> to the shared memory.
+                <script>
+                    generate_table("SharedMemoryTensor", 
+                    [
+                        ["Tensor", "CPU", "float32", "ndim=1"]
+                    ],
+                    [
+                        ["None", "", "", ""] 
+                    ]
+                    );
+                </script>
+
             </div>
             <div class="col" id="cSharedMemory">
                 <script>createHeader("cSharedMemory", "class", "", "cSharedMemory", "");</script>
-                Class to manage sending and receiving tensors in shared memory. Reads the memory handle from the argument <b>--handle</b>, 
+                Class to manage the shared memory. Reads the memory handle from the argument <b>--handle</b>, 
                 with which the environment was called.
                 <script>createHeader("cSharedMemory", "function", "cSharedMemory", "exists", "()");</script>
                 Checks if there is shared memory chunk with the handle, passed to the project.
@@ -138,64 +170,96 @@
                                     ]
                                     );
                 </script>
-                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "sendIntArray", "(name, array)");</script>
-                Sends 1d <b>array</b> with the id  <b>name</b> to the shared memory.
+                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "findIntTensor", "(name)");</script>
+                Searches 1d tensor with the id  <b>name</b> in the shared memory.
                 <script>
                     generate_table("cSharedMemory", 
                                     [
-                                        ["name", "CPU", "String", ""], 
-                                        ["Array", "CPU", "Int", "ndim = 1"]
+                                        ["name", "CPU", "String", ""]
                                     ],
                                     [
-                                        ["None","","",""]
+                                        ["Persistent int32 tensor","CPU","Int","ndim = 1"]
                                     ]
                                     );
                 </script>
-                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "getIntArray", "(name, array)");</script>
-                Receives 1d <b>array</b> with the id  <b>name</b> from the shared memory.
+                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "findFloatTensor", "(name)");</script>
+                Searches 1d tensor with the id  <b>name</b> in the shared memory.
                 <script>
                     generate_table("cSharedMemory", 
                                     [
                                         ["name", "CPU", "String", ""], 
                                     ],
                                     [
-                                        ["Array", "CPU", "Int", "ndim = 1"]
+                                        ["Persistent float32 tensor", "CPU", "Float", "ndim = 1"]
                                     ]
                                     );
                 </script>
 
-                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "sendFloatArray", "(name, array)");</script>
-                Sends 1d <b>array</b> with the id  <b>name</b> to the shared memory.
+                <script>createHeader("cSharedMemory", "class", "", "cPersistentIntTensor", "");</script>
+                Class for reading and writing int32 tensors into shared memory.
+
+                <script>createHeader("cSharedMemory", "function", "cPersistentIntTensor", "read", "()");</script>
+                Reads 1d integer array from the shared memory.
                 <script>
                     generate_table("cSharedMemory", 
-                                    [
-                                        ["name", "CPU", "String", ""], 
-                                        ["Array", "CPU", "Float", "ndim = 1"]
-                                    ],
-                                    [
-                                        ["None","","",""]
-                                    ]
-                                    );
+                    [
+                        ["None", "", "", ""]
+                    ],
+                    [
+                        ["PoolVector<int>", "CPU", "int32", ""]
+                    ]
+                    );
                 </script>
-                <script>createHeader("cSharedMemory", "function", "cSharedMemory", "getFloatArray", "(name, array)");</script>
-                Receives 1d <b>array</b> with the id  <b>name</b> from the shared memory.
+
+                <script>createHeader("cSharedMemory", "function", "cPersistentIntTensor", "write", "(array)");</script>
+                Writes 1d integer <b>array</b> to the shared memory.
                 <script>
                     generate_table("cSharedMemory", 
-                                    [
-                                        ["name", "CPU", "String", ""], 
-                                    ],
-                                    [
-                                        ["Array", "CPU", "Float", "ndim = 1"]
-                                    ]
-                                    );
+                    [
+                        ["PoolVector<int>", "CPU", "int32", ""]
+                    ],
+                    [
+                        ["None", "", "", ""] 
+                    ]
+                    );
                 </script>
+
+                <script>createHeader("cSharedMemory", "class", "", "cPersistentFloatTensor", "");</script>
+                Class for reading and writing float32 tensors into shared memory.
+
+                <script>createHeader("cSharedMemory", "function", "cPersistentFloatTensor", "read", "()");</script>
+                Reads 1d float tensor from the shared memory.
+                <script>
+                    generate_table("cSharedMemory", 
+                    [
+                        ["None", "", "", ""]
+                    ],
+                    [
+                        ["PoolVector<float>", "CPU", "float32", ""]
+                    ]
+                    );
+                </script>
+
+                <script>createHeader("cSharedMemory", "function", "cPersistentFloatTensor", "write", "(array)");</script>
+                Writes 1d float <b>array</b> to the shared memory.
+                <script>
+                    generate_table("cSharedMemory", 
+                    [
+                        ["PoolVector<float>", "CPU", "float32", ""]
+                    ],
+                    [
+                        ["None", "", "", ""] 
+                    ]
+                    );
+                </script>
+
             </div>
             <div class="col">
-                These classes manage the sending and receiving Arrays or tensors in the shared memory. When 
-                the funciton receive is called the shared variable that was read is deallocated. 
-                On the other hand when the send functions are called the new variables with the corresponding ids 
-                are allocated in the shared memory.<br><br>
-                Godot classes get their shered memory handle from the command line arguments and assume that the 
+                These classes manage the sending and receiving Arrays or tensors in the shared memory. The Godot 
+                part does not allocate or deallocate memory. Only python part can create persistent tensors in the 
+                shared memory as well as allocate the memory chunk itself.
+                <br><br>
+                Godot classes get their shared memory handle from the command line arguments and assume that the 
                 chunk of the shared memory with such handle is already allocated by the caller process.<br>
                 On the other hand, when python class is constructed it automatically allocates the shared memory chunk 
                 with the handle.

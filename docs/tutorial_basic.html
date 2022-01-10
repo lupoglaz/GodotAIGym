@@ -142,20 +142,26 @@ env.close()
                 <h5>Code 3: Introducing semaphores.</h5>
                 <pre class="pre"><code class="python">
 class DummyEnvSemaphores(gym.Env):
-    def __init__(self):
+    def __init__(self, num_actions, num_observations):
         self.mem = _GodotEnv.SharedMemoryTensor("environment")
         self.sem_act = _GodotEnv.SharedMemorySemaphore("sem_action", 0)
         self.sem_obs = _GodotEnv.SharedMemorySemaphore("sem_observation", 0)
+        
+        #Shared memory tensors
+        self.agent_action_tensor = self.mem.newFloatTensor("agent_action", num_actions)
+        self.observation_tensor = self.mem.newFloatTensor("observation", num_observations)
 
     def seed(self, seed=None):
         pass
 
     def step(self, action):
-        self.mem.sendInt("agent_action", action)
+        #sending action
+        self.agent_action_tensor.write(action)
         self.sem_act.post()
 
         self.sem_obs.wait()
-        observation = self.mem.receiveFloat("observation")
+        #receiving observation
+        observation = self.observation_tensor.read()
         
         return observation, reward, done, info
         
@@ -198,6 +204,8 @@ class DummyEnvSemaphores(gym.Env):
                     <h5>Code 4: Environment node script</h5>
                     <pre class="pre"><code class="python">
 var deltat = 0.1
+var agent_action_tensor
+var observation_tensor
 func _ready():
     mem = cSharedMemory.new()
     if mem.exists():
@@ -205,6 +213,10 @@ func _ready():
         sem_observation = cSharedMemorySemaphore.new()
         sem_action.init("sem_action")
         sem_observation.init("sem_observation")
+        
+        #Shared memory tensors
+        agent_action_tensor = mem.findFloatTensor("agent_action")
+		observation_tensor = mem.findFloatTensor("observation")
     
     set_physics_process(true)
 
@@ -212,15 +224,16 @@ func _physics_process(delta):
     if timeout:    
         if mem.exists():
             sem_action.wait()
-            agent_action = mem.getIntArray("agent_action")
-            env_action = mem.getIntArray("env_action")
+            #receiving action
+            agent_action = agent_action_tensor.read()
         
         $Timer.start(deltat)
         timeout = false
 
 func _on_Timer_timeout():
     if mem.exists():	
-        mem.sendFloatArray("observation", observation)
+        #sending observation
+        observation_tensor.write(observation)
         sem_observation.post()
     
     timeout = true
