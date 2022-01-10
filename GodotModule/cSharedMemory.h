@@ -50,12 +50,12 @@ class cPersistentIntTensor : public Reference{
 		}
 		~cPersistentIntTensor(){}
 		void write(const PoolVector<int> &array){
-            // print_line(String("Write int vector:"+String(String::num_int64(size))));
+            //print_line(String("Write int vector:"+String(String::num_int64(size))));
 			for(int i=0; i<size; i++)
 				(*vector)[i] = array[i];
 		};
 		PoolVector<int> read(){
-            // print_line(String("Read int vector:"+String(String::num_int64(size))));
+            //print_line(String("Read int vector:"+String(String::num_int64(size))));
             PoolVector<int> data;
 			for(int i=0; i<size; i++)
 				data.push_back( (*vector)[i] );
@@ -85,7 +85,7 @@ class cPersistentFloatTensor : public Reference {
 				(*vector)[i] = array[i];
 		}
 		PoolVector<float> read(){
-            // print_line(String("Read float vector:"+String(String::num_int64(size))));
+            //print_line(String("Read float vector:"+String(String::num_int64(size))));
 			PoolVector<float> data;
 			for(int i=0; i<size; i++)
 				data.push_back( (*vector)[i] );
@@ -99,8 +99,6 @@ class cSharedMemory : public Reference {
 private:
     std::string *segment_name = NULL;
     managed_shared_memory *segment = NULL;
-    shared_memory_object *object = NULL;
-
     bool found;
 
 protected:
@@ -112,11 +110,6 @@ public:
 
     Ref<cPersistentFloatTensor> findFloatTensor(const String &name);
     Ref<cPersistentIntTensor> findIntTensor(const String &name);
-
-    PoolVector<int> getIntArray(const String &name);
-    PoolVector<float> getFloatArray(const String &name);
-    void sendIntArray(const String &name, const PoolVector<int> &array);
-    void sendFloatArray(const String &name, const PoolVector<float> &array);
     bool exists();
 };
 
@@ -142,7 +135,7 @@ class cSharedMemorySemaphore : public Reference {
         void init(const String &sem_name){
             
             std::wstring ws = sem_name.c_str();
-	    std::string s_name( ws.begin(), ws.end() );
+	        std::string s_name( ws.begin(), ws.end() );
             name = new std::string(s_name);
             // std::cout<<"Constructing semaphore "<<*name<<std::endl;
             try{

@@ -54,7 +54,6 @@ cSharedMemory::~cSharedMemory(){
 	//shared_memory_object::remove(segment_name->c_str());
     delete segment;
     delete segment_name;
-    delete object;
 };
 
 bool cSharedMemory::exists(){
@@ -88,92 +87,6 @@ Ref<cPersistentIntTensor> cSharedMemory::findIntTensor(const String &name){
 	return tensor;
 }
 
-PoolVector<int> cSharedMemory::getIntArray(const String &name){
-	std::wstring ws = name.c_str();
-	std::string s_name( ws.begin(), ws.end() );
-	
-	PoolVector<int> data;
-	try{
-		IntVector *shared_vector = segment->find<IntVector> (s_name.c_str()).first;
-		print_line(String("Read int vector:"+String(String::num_int64(shared_vector->size()))));
-		for(int i=0; i<shared_vector->size(); i++){
-			data.push_back( (*shared_vector)[i] );
-		}
-		segment->destroy<IntVector>(s_name.c_str());
-
-		//delete shared_vector;
-	}catch(interprocess_exception &ex){
-        print_line(String("getIntArray:")+String(s_name.c_str())+String(":")+String(ex.what()));
-    }catch(std::exception &ex){
-        print_line(String("getIntArray:")+String(s_name.c_str())+String(":")+String(ex.what()));
-    }catch(const char *s){
-		print_line(String("getIntArray:")+String(s));
-	}
-	return data;
-}
-
-PoolVector<float> cSharedMemory::getFloatArray(const String &name){
-	std::wstring ws = name.c_str();
-	std::string s_name( ws.begin(), ws.end() );
-	
-	PoolVector<float> data;
-	try{
-		FloatVector *shared_vector = segment->find<FloatVector> (s_name.c_str()).first;
-		print_line(String("Read float vector:"+String(String::num_int64(shared_vector->size()))));
-		for(int i=0; i<shared_vector->size(); i++){
-			data.push_back( (*shared_vector)[i] );
-		}
-		segment->destroy<FloatVector>(s_name.c_str());
-		//delete shared_vector;
-	}catch(interprocess_exception &ex){
-          print_line(String("getFloatArray:")+String(s_name.c_str())+String(":")+String(ex.what()));
-    }catch(std::exception &ex){
-        print_line(String("getFloatArray:")+String(s_name.c_str())+String(":")+String(ex.what()));
-    }catch(const char *s){
-		print_line(String("getIntArray:")+String(s));
-	}
-	return data;
-}
-
-void cSharedMemory::sendIntArray(const String &name, const PoolVector<int> &array){
-	std::wstring ws = name.c_str();
-	std::string s_name( ws.begin(), ws.end() );
-	try{
-		const ShmemAllocatorInt alloc_inst (segment->get_segment_manager());
-		IntVector *shared_vector = segment->construct<IntVector>(s_name.c_str())(alloc_inst);
-		print_line(String("Sent int vector:"+String(String::num_int64(array.size()))));
-		for(int i=0; i<array.size(); i++)
-			shared_vector->push_back(array[i]);
-		//delete shared_vector;
-
-	}catch(interprocess_exception &ex){
-         print_line(String("sendIntArray:")+String(s_name.c_str())+String(":")+String(ex.what()));
-    }catch(std::exception &ex){
-        print_line(String("sendIntArray:")+String(s_name.c_str())+String(":")+String(ex.what()));
-    }catch(const char *s){
-		print_line(String("sendIntArray:")+String(s));
-	}
-}
-
-void cSharedMemory::sendFloatArray(const String &name, const PoolVector<float> &array){
-	std::wstring ws = name.c_str();
-	std::string s_name( ws.begin(), ws.end() );
-	try{
-		const ShmemAllocatorFloat alloc_inst (segment->get_segment_manager());
-		FloatVector *shared_vector = segment->construct<FloatVector>(s_name.c_str())(alloc_inst);
-		print_line(String("Sent float vector:"+String(String::num_int64(array.size()))));
-		for(int i=0; i<array.size(); i++)
-			shared_vector->push_back(array[i]);
-		//delete shared_vector;
-	}catch(interprocess_exception &ex){
-          print_line(String("sendFloatArray:")+String(s_name.c_str())+String(":")+String(ex.what()));
-    }catch(std::exception &ex){
-        print_line(String("sendFloatArray:")+String(s_name.c_str())+String(":")+String(ex.what()));
-    }catch(const char *s){
-		print_line(String("sendFloatArray:")+String(s));
-	}
-}
-
 void cPersistentFloatTensor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("read"), &cPersistentFloatTensor::read);
 	ClassDB::bind_method(D_METHOD("write", "array"), &cPersistentFloatTensor::write);
@@ -186,10 +99,6 @@ void cPersistentIntTensor::_bind_methods() {
 void cSharedMemory::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("findIntTensor", "str"), &cSharedMemory::findIntTensor);
 	ClassDB::bind_method(D_METHOD("findFloatTensor", "str"), &cSharedMemory::findFloatTensor);
-	ClassDB::bind_method(D_METHOD("getIntArray", "str"), &cSharedMemory::getIntArray);
-	ClassDB::bind_method(D_METHOD("getFloatArray", "str"), &cSharedMemory::getFloatArray);
-	ClassDB::bind_method(D_METHOD("sendIntArray", "str", "array"), &cSharedMemory::sendIntArray);
-	ClassDB::bind_method(D_METHOD("sendFloatArray", "str", "array"), &cSharedMemory::sendFloatArray);
 	ClassDB::bind_method(D_METHOD("exists"), &cSharedMemory::exists);
 }
 

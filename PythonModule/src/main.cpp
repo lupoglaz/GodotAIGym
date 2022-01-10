@@ -17,11 +17,7 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 	py::class_<cSharedMemoryTensor>(m, "SharedMemoryTensor")
 		.def(py::init<const std::string &>())
 		.def("newIntTensor", &cSharedMemoryTensor::newIntTensor)
-		.def("newFloatTensor", &cSharedMemoryTensor::newFloatTensor)
-		.def("sendInt", &cSharedMemoryTensor::sendInt)
-		.def("sendFloat", &cSharedMemoryTensor::sendFloat)
-		.def("receiveInt", &cSharedMemoryTensor::receiveInt)
-		.def("receiveFloat", &cSharedMemoryTensor::receiveFloat);
+		.def("newFloatTensor", &cSharedMemoryTensor::newFloatTensor);
 
 	py::class_<cSharedMemorySemaphore>(m, "SharedMemorySemaphore")
 		.def(py::init<const std::string &, int>())

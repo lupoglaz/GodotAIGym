@@ -16,7 +16,6 @@ cSharedMemoryTensor::~cSharedMemoryTensor(){
 	shared_memory_object::remove(segment_name->c_str());
 	delete segment;
 	delete segment_name;
-	delete object;
 }
 
 cPersistentIntTensor* cSharedMemoryTensor::newIntTensor(const std::string &name, int size){
@@ -45,88 +44,6 @@ cPersistentFloatTensor* cSharedMemoryTensor::newFloatTensor(const std::string &n
 	myvector->resize(size);
 	cPersistentFloatTensor *tensor = new cPersistentFloatTensor(myvector, name, segment);
 	return tensor;
-}
-
-void cSharedMemoryTensor::sendInt(const std::string &name, torch::Tensor T){
-	CHECK_CPU_INPUT_TYPE(T, torch::kInt);
-	if(T.ndimension() != 1){
-		std::cout<<"Number of dimensions should be 1";
-	}
-	if(segment->find<IntVector>(name.c_str()).first){
-		std::cout<<"Variable already exists";
-	}
-	try{
-		const ShmemAllocatorInt alloc_inst (segment->get_segment_manager());
-		IntVector *myvector = segment->construct<IntVector>(name.c_str())(alloc_inst);
-		// myvector->resize(T.size(0));
-		// myvector->assign(T.data<int>(), T.data<int>() + T.size(0));
-		std::cout<<"PythonModule:sendInt:"<<T.size(0)<<std::endl;
-		for(int i=0; i<T.size(0); i++)
-			myvector->push_back(T.data<int>()[i]);
-	}catch(interprocess_exception &ex){
-		std::cout<<"PythonModule:sendInt:"<<name<<":"<<boost::diagnostic_information(ex)<<ex.get_native_error()<<std::endl;
-	}catch(std::exception &ex){
-		std::cout<<"PythonModule:sendInt:"<<ex.what()<<std::endl;
-	}
-}
-
-void cSharedMemoryTensor::sendFloat(const std::string &name, torch::Tensor T){
-	CHECK_CPU_INPUT_TYPE(T, torch::kFloat);
-	if(T.ndimension() != 1){
-		std::cout<<"Number of dimensions should be 1";
-	}
-	if(segment->find<FloatVector>(name.c_str()).first){
-		std::cout<<"Variable already exists";
-	}
-	try{
-		const ShmemAllocatorFloat alloc_inst (segment->get_segment_manager());
-		FloatVector *myvector = segment->construct<FloatVector>(name.c_str())(alloc_inst);
-		// myvector->resize(T.size(0));
-//        myvector->assign(T.data<float>(), T.data<float>() + T.size(0));
-		std::cout<<"PythonModule:sendFloat:"<<T.size(0)<<std::endl;
-		for(int i=0; i<T.size(0); i++)
-			myvector->push_back(T.data<float>()[i]);
-	}catch(interprocess_exception &ex){
-		std::cout<<"PythonModule:sendFloat:"<<name<<":"<<boost::diagnostic_information(ex)<<ex.get_native_error()<<std::endl;
-	}catch(std::exception &ex){
-		std::cout<<"PythonModule:sendFloat:"<<ex.what()<<std::endl;
-	}
-}
-
-torch::Tensor cSharedMemoryTensor::receiveInt(const std::string &name){
-	torch::Tensor T;
-	try{
-		IntVector *myvector = segment->find<IntVector> (name.c_str()).first;
-		T = torch::zeros(myvector->size(), torch::TensorOptions().dtype(torch::kInt).device(torch::kCPU));
-	  	std::cout<<"PythonModule:receiveInt:"<<myvector->size()<<std::endl;
-		for(int i=0; i<myvector->size(); i++)
-			T[i] = (*myvector)[i];
-		
-		segment->destroy<IntVector>(name.c_str());
-	}catch(interprocess_exception &ex){
-		std::cout<<"PythonModule:receiveInt:"<<name<<":"<<boost::diagnostic_information(ex)<<ex.get_native_error()<<std::endl;
-	}catch(std::exception &ex){
-		std::cout<<"PythonModule:receiveInt:"<<ex.what()<<std::endl;
-	}
-	return T;
-}
-
-torch::Tensor cSharedMemoryTensor::receiveFloat(const std::string &name){
-	torch::Tensor T;
-	try{
-		FloatVector *myvector = segment->find<FloatVector> (name.c_str()).first;
-		T = torch::zeros(myvector->size(), torch::TensorOptions().dtype(torch::kFloat).device(torch::kCPU));
-		std::cout<<"PythonModule:receiveFloat:"<<myvector->size()<<std::endl;
-		for(int i=0; i<myvector->size(); i++)
-			T[i] = (*myvector)[i];
-		
-		segment->destroy<FloatVector>(name.c_str());
-	}catch(interprocess_exception &ex){
-		std::cout<<"PythonModule:receiveFloat:"<<name<<":"<<boost::diagnostic_information(ex)<<ex.get_native_error()<<std::endl;
-	}catch(std::exception &ex){
-		std::cout<<"PythonModule:receiveFloat:"<<ex.what()<<std::endl;
-	}
-	return T;
 }
 
 cSharedMemorySemaphore::cSharedMemorySemaphore(const std::string &sem_name, int init_count){

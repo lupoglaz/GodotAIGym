@@ -35,7 +35,7 @@ class cPersistentIntTensor{
 		}
 		void write(torch::Tensor T){
 			for(int i=0; i<size; i++)
-				(*vector)[i] = T.data<int>()[i];
+				(*vector)[i] = T.data_ptr<int>()[i];
 		};
 		torch::Tensor read(){
 			torch::Tensor T = torch::zeros(size, torch::TensorOptions().dtype(torch::kInt).device(torch::kCPU));
@@ -64,7 +64,7 @@ class cPersistentFloatTensor{
 		}
 		void write(torch::Tensor T){
 			for(int i=0; i<size; i++)
-				(*vector)[i] = T.data<float>()[i];
+				(*vector)[i] = T.data_ptr<float>()[i];
 		}
 		torch::Tensor read(){
 			torch::Tensor T = torch::zeros(size, torch::TensorOptions().dtype(torch::kFloat).device(torch::kCPU));
@@ -80,8 +80,6 @@ class cSharedMemoryTensor{
 
 		std::string *segment_name = NULL;
 		managed_shared_memory *segment = NULL;
-		shared_memory_object *object = NULL;
-
 	public:
 		
 		cSharedMemoryTensor(const std::string &name);
@@ -89,11 +87,6 @@ class cSharedMemoryTensor{
 		
 		cPersistentIntTensor* newIntTensor(const std::string &name, int size);
 		cPersistentFloatTensor* newFloatTensor(const std::string &name, int size);
-
-		void sendInt(const std::string &name, torch::Tensor T);
-		void sendFloat(const std::string &name, torch::Tensor T);
-		torch::Tensor receiveInt(const std::string &name);
-		torch::Tensor receiveFloat(const std::string &name);
 };
 
 class cSharedMemorySemaphore{
