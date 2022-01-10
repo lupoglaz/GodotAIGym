@@ -10,6 +10,7 @@ Make your Godot project into OpenAI Gym environment to train RL models with PyTo
 3. Pytorch version == 1.10
 4. Python setuptools
 
+
 ## Installation
 First, in **setup.py** change the variable **GODOT_PATH** to the root directory of godot engine source. Then run:
 ```bash
