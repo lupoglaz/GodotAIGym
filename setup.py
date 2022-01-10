@@ -47,6 +47,8 @@ def install_python_module():
 	os.chdir(current_path)
 
 if __name__=='__main__':
+	assert os.path.exists(GODOT_PATH)
+	
 	download_unpack(rewrite=False)
 	install_module(godot_root=GODOT_PATH, rewrite=True)
 	install_python_module()
