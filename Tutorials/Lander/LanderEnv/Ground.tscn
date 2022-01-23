@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Ground.gd" type="Script" id=1]
+[ext_resource path="res://Flag.png" type="Texture" id=2]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 50, 10 )
+
+[node name="Ground" type="RigidBody2D"]
+position = Vector2( 495.962, 226.471 )
+mode = 1
+can_sleep = false
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+
+[node name="LandingArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LandingArea"]
+shape = SubResource( 1 )
+
+[node name="Flag" type="Sprite" parent="LandingArea"]
+position = Vector2( -51.1729, -11.2663 )
+scale = Vector2( 0.357828, 0.536209 )
+texture = ExtResource( 2 )
+
+[node name="Flag2" type="Sprite" parent="LandingArea"]
+position = Vector2( 53.4774, -11.8609 )
+scale = Vector2( 0.357828, 0.536209 )
+texture = ExtResource( 2 )
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+[connection signal="body_entered" from="LandingArea" to="." method="_on_LandingArea_body_entered"]
+[connection signal="body_exited" from="LandingArea" to="." method="_on_LandingArea_body_exited"]
