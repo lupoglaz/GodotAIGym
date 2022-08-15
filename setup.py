@@ -7,7 +7,7 @@ from zipfile import ZipFile
 from pathlib import Path
 
 # GODOT_PATH = os.environ["GODOT_PATH"]
-GODOT_PATH = "/home/lupoglaz/Projects/godot32"
+GODOT_PATH = "/home/kimbring2/godot-3.2-stable"
 
 def download_unpack(rewrite=False):
 	# url = 'https://download.pytorch.org/libtorch/cu102/libtorch-cxx11-abi-shared-with-deps-1.7.0.zip'

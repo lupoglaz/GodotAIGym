@@ -46,6 +46,20 @@ cPersistentFloatTensor* cSharedMemoryTensor::newFloatTensor(const std::string &n
 	return tensor;
 }
 
+cPersistentUintTensor* cSharedMemoryTensor::newUintTensor(const std::string &name, int size) {
+	const ShmemAllocatorInt alloc_inst(segment->get_segment_manager());
+	UintVector *myvector = segment->construct<UintVector>(name.c_str())(alloc_inst);
+	if (myvector == NULL) {
+		std::cout<<"Cannot create vector "<<name<<std::endl;
+	} else {
+		// std::cout << "Created vector "<< name.length() << std::endl;
+		std::cout<<"Created uint32 vector "<<name<<" size = "<<size<<std::endl;
+	}
+	myvector->resize(size);
+	cPersistentUintTensor *tensor = new cPersistentUintTensor(myvector, name, segment);
+	return tensor;
+}
+
 cSharedMemorySemaphore::cSharedMemorySemaphore(const std::string &sem_name, int init_count){
 	try{
 		name = new std::string(sem_name);

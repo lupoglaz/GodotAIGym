@@ -30,8 +30,10 @@ using namespace boost::interprocess;
 
 typedef allocator<int, managed_shared_memory::segment_manager>  ShmemAllocatorInt;
 typedef allocator<float, managed_shared_memory::segment_manager>  ShmemAllocatorFloat;
+typedef allocator<uint8_t, managed_shared_memory::segment_manager>  ShmemAllocatorUint;
 typedef std::vector<int, ShmemAllocatorInt> IntVector;
 typedef std::vector<float, ShmemAllocatorFloat> FloatVector;
+typedef std::vector<uint8_t, ShmemAllocatorUint> UintVector;
 
 class cPersistentIntTensor : public Reference{
     GDCLASS(cPersistentIntTensor, Reference);
@@ -92,6 +94,37 @@ class cPersistentFloatTensor : public Reference {
 			return data;
 		}
 };
+class cPersistentUintTensor : public Reference {
+    GDCLASS(cPersistentUintTensor, Reference);
+
+    private:
+        UintVector *vector = NULL;
+        int size;
+
+    protected:
+        static void _bind_methods();
+
+    public:
+        cPersistentUintTensor(UintVector *_vector){
+            vector = _vector;
+            size = _vector->size();
+        }
+        ~cPersistentUintTensor(){}
+        void write(const PoolVector<uint8_t> &array){
+            //print_line(String("Write uint vector:" + String(String::num_int64(size))));
+            for (int i = 0; i < size; i++){
+                //print_line(String("array[i]: " + String(String::num_real(array[i]))));
+                (*vector)[i] = array[i];
+            }
+        }
+        PoolVector<uint8_t> read(){
+            //print_line(String("Read float vector:"+String(String::num_int64(size))));
+            PoolVector<uint8_t> data;
+            for (int i = 0; i < size; i++)
+                data.push_back( (*vector)[i] );
+            return data;
+        }
+};
 
 class cSharedMemory : public Reference {
     GDCLASS(cSharedMemory, Reference);
@@ -110,6 +143,7 @@ public:
 
     Ref<cPersistentFloatTensor> findFloatTensor(const String &name);
     Ref<cPersistentIntTensor> findIntTensor(const String &name);
+    Ref<cPersistentUintTensor> findUintTensor(const String &name);
     bool exists();
 };
 
