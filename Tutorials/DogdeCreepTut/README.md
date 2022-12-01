@@ -18,7 +18,7 @@ This repo is branch of original GodotAIGym to use the frame screen as the input 
 $ python env_test.py
 ```
 
-<img src="images/image_1.png" width="600" title="env_test.py image">
+<img src="images/image_1.png" width="400" title="env_test.py image">
 
 4. If you can see the above image, try to train the agent using below command. It should start to run the 8 Godot games.
 ```
@@ -31,3 +31,8 @@ $ ./stop.sh
 ```
 
 6. You can see the training progress by using the Tensorboard under the tensorboard folder.
+```
+$ tensorboard --logdir=./tensorboard
+```
+
+<img src="images/reward_graph.png" width="400" title="tensorboard reward graph">
