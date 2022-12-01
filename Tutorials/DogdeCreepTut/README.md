@@ -36,3 +36,6 @@ $ tensorboard --logdir=./tensorboard
 ```
 
 <img src="images/reward_graph.png" width="400" title="tensorboard reward graph">
+
+7. You can see also the agent start to collect the coin after few hours later.
+<img src="images/training_result.gif" width="400" title="training result">
