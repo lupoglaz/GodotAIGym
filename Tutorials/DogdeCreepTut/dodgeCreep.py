@@ -13,9 +13,6 @@ import gym
 from gym import spaces
 
 
-print("_GodotEnv.__file__: ", _GodotEnv.__file__)
-
-
 class dodgeCreepEnv(gym.Env):
 	def __init__(self, exec_path, env_path, num_actions=5, num_observations=128*128*3, turbo_mode=False):
 		self.handle = "environment"
@@ -32,7 +29,7 @@ class dodgeCreepEnv(gym.Env):
 		with open("stdout.txt","wb") as out, open("stderr.txt","wb") as err:
 			if turbo_mode:
 				#exec_path = exec_path + " t"
-				self.process = subprocess.Popen([exec_path, "t" ,"--path", os.path.abspath(env_path), "--handle", self.handle], stdout=out, stderr=err)
+				self.process = subprocess.Popen([exec_path, "t" ,"--path", os.path.abspath(env_path), "--handle", self.handle, "--fixed-fps 600"], stdout=out, stderr=err)
 			else:
 				self.process = subprocess.Popen([exec_path, "n" ,"--path", os.path.abspath(env_path), "--handle", self.handle], stdout=out, stderr=err)
 

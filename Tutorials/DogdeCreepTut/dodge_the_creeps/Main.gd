@@ -1,7 +1,7 @@
 extends Node
 
-var agent_action = [0.0]
-var env_action = [0,0]
+#var agent_action = [0.0]
+#var env_action = [0,0]
 
 var sem_action
 var sem_observation
@@ -24,16 +24,19 @@ var score
 var reward = 0
 var done = 0
 var speed_scale = 1.0
-var timeout = true
-var action = 0
 
 
 func _ready():
 	var args = Array(OS.get_cmdline_args())
 	
-	if args.has("t"):
-		Engine.time_scale = 1.0;
-		speed_scale = 1.0
+	#if args.has("t"):
+	#Engine.target_fps = 600;
+	#Engine.time_scale = 10.0;
+	#speed_scale = 10.0
+	
+	#Engine.set_iterations_per_second(600.0)
+	Engine.set_time_scale(1.0);
+	#VisualServer.render_loop_enabled = false;
 	
 	mem = cSharedMemory.new()
 	sem_physics = Semaphore.new()
@@ -52,36 +55,25 @@ func _ready():
 		done_tensor = mem.findIntTensor("done")
 		print("Running as OpenAIGym environment")
 		
-		$Timer.start()
+		#$Timer.start()
+		#$EndTimer.start()
 		#$HUD._on_StartButton_pressed()
 
 	randomize()
 
 
 func game_over():
-	#print("func game_over()")
-	#$StartTimer.stop()
-	
-	reward = -1.0
+	reward = 0.0
 	done = 1.0
-
-	#$ScoreTimer.stop()
-	#$MobTimer.stop()
-	#$HUD.show_game_over()
-	#$Music.stop()
-	#$DeathSound.play()
-	
-	#yield(get_tree().create_timer(4.0), "timeout")
-	#new_game()
-	#$HUD.hide_game_over()
 
 
 func get_coin():
 	reward = 1.0
+	score += reward
+	$Player.update_score_player(score)
 
 
 func new_game():
-	#print("func new_game()")
 	done = 0
 	reward = 0.0
 	
@@ -91,11 +83,22 @@ func new_game():
 	score = 0
 	$Player.start($StartPosition.position)
 	$StartTimer.start()
-	$HUD.update_score(score)
-	$HUD.show_message("Get Ready")
-	#$Music.play()
+	$Player.new_game_player(score)
+	#$HUD.update_score(score)
+	#$HUD.show_message("Get Ready")
+	#$HUD.hide_game_over()
+	#_on_CoinTimer_timeout()
 	
-	$HUD.hide_game_over()
+	_add_Coin(50, 250)
+	_add_Coin(100, 100)
+	_add_Coin(200, 450)
+	_add_Coin(700, 100)
+	_add_Coin(300, 300)
+	_add_Coin(100, 700)
+	_add_Coin(600, 250)
+	_add_Coin(400, 50)
+	_add_Coin(500, 700)
+	_add_Coin(700, 700)
 	
 
 func _on_MobTimer_timeout():
@@ -122,8 +125,33 @@ func _on_MobTimer_timeout():
 
 	# Spawn the mob by adding it to the Main scene.
 	add_child(mob)
+	
+	
+func _add_Coin(x, y):
+	var coin = coin_scene.instance()
+	
+	var rng = RandomNumberGenerator.new()
+	rng.randomize()
+	var spawn_height = rng.randi_range(10, 790)
+	var spawn_width = rng.randi_range(10, 790)
+	spawn_width = x
+	spawn_height = y
+	
+	var position = Vector2(spawn_height, spawn_width)
+	coin.position = position
+	
+	# Add some randomness to the direction.
+	var direction = rand_range(-PI / 4, PI / 4)
+	coin.rotation = direction
 
+	# Choose the velocity for the mob.
+	var velocity = Vector2(rand_range(0.0, 0.0), 0.0)
+	coin.linear_velocity = velocity.rotated(direction)
 
+	# Spawn the mob by adding it to the Main scene.
+	add_child(coin)
+	
+	
 func _on_CoinTimer_timeout():
 	var coin = coin_scene.instance()
 
@@ -133,12 +161,9 @@ func _on_CoinTimer_timeout():
 	
 	var rng = RandomNumberGenerator.new()
 	rng.randomize()
-	var spawn_height = rng.randi_range(0, 800)
-	var spawn_width = rng.randi_range(0, 1000)
-	
-	#print("spawn_height: ", spawn_height)
-	#print("spawn_width: ", spawn_width)
-	#print("")
+	var spawn_height = rng.randi_range(0, 700)
+	var spawn_width = rng.randi_range(0, 700)
+	spawn_width = 260
 	
 	var position = Vector2(spawn_height, spawn_width)
 	coin.position = position
@@ -156,15 +181,18 @@ func _on_CoinTimer_timeout():
 
 
 func _on_ScoreTimer_timeout():
-	score += 1
-	$HUD.update_score(score)
+	#score += 1
+	#$HUD.update_score(score)
+	#$Player.new_game_player(score)
+	pass
 
 
 func _on_StartTimer_timeout():
-	$MobTimer.start()
-	$CoinTimer.start()
+	#$MobTimer.start()
+	#$CoinTimer.start()
 	$ScoreTimer.start()
-	$Timer.start()
+	#$Timer.start()
+	$EndTimer.start()
 
 
 func _get_screen_frame():
@@ -183,25 +211,25 @@ func _get_screen_frame():
 	return img_pool_vector
 
 
-func _on_Timer_timeout():
-	#print("_on_Timer_timeout")
+func _observation_Function():
+	#print("_observation_Function")
 	sem_physics.wait()
 	
 	var return_values = _get_screen_frame()
 	var observation = return_values
 	
 	if mem.exists():
-		sem_action.wait()
-		agent_action = agent_action_tensor.read()
-		env_action = env_action_tensor.read()
+		#sem_action.wait()
+		#agent_action = agent_action_tensor.read()
+		#env_action = env_action_tensor.read()
 		#print("agent_action: ", agent_action)
 		#print("env_action: ", env_action)
 		
-		if env_action[0] == 1:
-			$HUD._on_StartButton_pressed()
+		#if env_action[0] == 1:
+		#	$HUD._on_StartButton_pressed()
 		
 		#$Player.set_action(agent_action[0], speed_scale)
-		action = agent_action[0]
+		#action = agent_action[0]
 		
 		#print("mem.exists()\n")
 		observation_tensor.write(observation)
@@ -212,5 +240,9 @@ func _on_Timer_timeout():
 		done_tensor.write([done])
 		sem_observation.post()
 		
-	timeout = true
+	$Player.timeout = true
 	sem_physics.post()
+
+
+func _on_EndTimer_timeout():
+	game_over()

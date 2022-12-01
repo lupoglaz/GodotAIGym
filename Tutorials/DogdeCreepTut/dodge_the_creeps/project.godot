@@ -25,10 +25,15 @@ following the tutorial in the documentation."
 run/main_scene="res://Main.tscn"
 config/icon="res://icon.png"
 
+[debug]
+
+settings/fps/force_fps=600
+
 [display]
 
-window/size/width=780
-window/size/height=960
+window/size/width=800
+window/size/height=800
+window/size/resizable=false
 window/stretch/mode="2d"
 window/stretch/aspect="keep"
 
