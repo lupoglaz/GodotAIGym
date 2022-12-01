@@ -10,10 +10,10 @@ This repo is branch of original GodotAIGym to use the frame screen as the input 
 7. Gym
 
 ## How to run
-1. First, you need to install the GodotAIGym module by following [instruction](https://github.com/kimbring2/GodotAIGym).
-2. Please test the [original agent](https://github.com/kimbring2/GodotAIGym/tree/master/Tutorials/InvPendulumTut).
+1. First, you need to install the GodotAIGym module by following [instruction of master branch](https://github.com/lupoglaz/GodotAIGym).
+2. Please test the [original agent of master branch](https://github.com/lupoglaz/GodotAIGym/tree/master/Tutorials/InvPendulumTut).
 
-3. If tutorial works, try to run the example of this repo by using below command. It should start to run the environment and show game screen and gray scale image of that. 
+3. If you can install and run the master branch, try to run the example of this repo by using below command. Different from master branch, it use the frame screen image as input. It should start to run the environment and show game screen and gray scale image of that. 
 ```
 $ python env_test.py
 ```
