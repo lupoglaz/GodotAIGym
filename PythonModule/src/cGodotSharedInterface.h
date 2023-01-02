@@ -117,6 +117,7 @@ class cSharedMemoryTensor{
 		
 		cPersistentIntTensor* newIntTensor(const std::string &name, int size);
 		cPersistentFloatTensor* newFloatTensor(const std::string &name, int size);
+		cPersistentUintTensor* newUintTensor(const std::string &name, int size);
 };
 
 class cSharedMemorySemaphore{
