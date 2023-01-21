@@ -43,7 +43,7 @@ def install_module(godot_root, rewrite=False):
 def install_python_module():
 	current_path = os.getcwd()
 	os.chdir('PythonModule')
-	os.system('python setup.py install')
+	os.system('python3.7 setup.py install')
 	os.chdir(current_path)
 
 if __name__=='__main__':
