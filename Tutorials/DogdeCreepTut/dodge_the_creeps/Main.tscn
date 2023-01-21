@@ -64,7 +64,7 @@ stream = ExtResource( 5 )
 stream = ExtResource( 6 )
 
 [node name="EndTimer" type="Timer" parent="."]
-wait_time = 10.0
+wait_time = 20.0
 [connection signal="coin" from="Player" to="." method="get_coin"]
 [connection signal="hit" from="Player" to="." method="game_over"]
 [connection signal="timeout" from="Player/Timer" to="Player" method="_on_Timer_timeout"]
