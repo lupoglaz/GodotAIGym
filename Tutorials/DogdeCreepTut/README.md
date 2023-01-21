@@ -22,7 +22,7 @@ $ python env_test.py
 
 4. If you can see the above image, try to train the agent using below command. It should start to run the 8 Godot games.
 ```
-$ ./run_reinforcement_learning.sh 8
+$ ./run_reinforcement_learning.sh 1
 ```
 
 5. You can stop the training by using below command.
