@@ -97,10 +97,10 @@ class cPersistentUintTensor{
 				(*vector)[i] = T.data_ptr<int>()[i];
 		};
 		torch::Tensor read(){
-			torch::Tensor T = torch::zeros(size, torch::TensorOptions().dtype(torch::kInt).device(torch::kCPU));
-			for(int i = 0; i < size; i++)
-				T[i] = (*vector)[i];
-			return T;
+			torch::Tensor T = torch::from_blob(vector->data(), {static_cast<int64_t>(vector->size())},
+			        torch::TensorOptions().dtype(torch::kU8).device(torch::kCPU));
+
+			return T.clone();
 		}
 };
 
