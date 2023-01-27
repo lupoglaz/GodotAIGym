@@ -20,9 +20,19 @@ $ python env_test.py
 
 <img src="images/image_1.png" width="400" title="env_test.py image">
 
-4. If you can see the above image, try to train the agent using below command. It should start to run the 8 Godot games.
+4. If you can see the above image, try to train the agent using below command. It should start to run the 1 Godot games.
 ```
 $ ./run_reinforcement_learning.sh 1
+```
+
+| :exclamation:  Please ignore the below error when running the learner.py file. It can be ignored. |
+```
+Traceback (most recent call last):
+  File "learner.py", line 381, in <module>
+    coord.join(thread_data)
+  File "/home/kimbring2/.local/lib/python3.7/site-packages/tensorflow/python/training/coordinator.py", line 353, in join
+    threads = self._registered_threads.union(set(threads))
+TypeError: 'Thread' object is not iterable
 ```
 
 5. You can stop the training by using below command.
