@@ -86,6 +86,19 @@ Ref<cPersistentIntTensor> cSharedMemory::findIntTensor(const String &name){
 	Ref<cPersistentIntTensor> tensor(memnew(cPersistentIntTensor(shared_vector)));
 	return tensor;
 }
+Ref<cPersistentUintTensor> cSharedMemory::findUintTensor(const String &name){
+	std::wstring ws = name.c_str();
+	std::string s_name( ws.begin(), ws.end() );
+	UintVector *shared_vector = segment->find<UintVector> (s_name.c_str()).first;
+	if(shared_vector == NULL){
+		// print_line(String("Not found:")+String(String::num_int64(s_name.length())));
+		print_line(String("Not found:")+String(s_name.c_str()));
+	} else{
+		print_line(String("Found:")+String(s_name.c_str()));
+	}
+	Ref<cPersistentUintTensor> tensor(memnew(cPersistentUintTensor(shared_vector)));
+	return tensor;
+}
 
 void cPersistentFloatTensor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("read"), &cPersistentFloatTensor::read);
@@ -95,10 +108,15 @@ void cPersistentIntTensor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("read"), &cPersistentIntTensor::read);
 	ClassDB::bind_method(D_METHOD("write", "array"), &cPersistentIntTensor::write);
 }
+void cPersistentUintTensor::_bind_methods(){
+	ClassDB::bind_method(D_METHOD("read"), &cPersistentUintTensor::read);
+	ClassDB::bind_method(D_METHOD("write", "array"), &cPersistentUintTensor::write);
+}
 
 void cSharedMemory::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("findIntTensor", "str"), &cSharedMemory::findIntTensor);
 	ClassDB::bind_method(D_METHOD("findFloatTensor", "str"), &cSharedMemory::findFloatTensor);
+	ClassDB::bind_method(D_METHOD("findUintTensor", "str"), &cSharedMemory::findUintTensor);
 	ClassDB::bind_method(D_METHOD("exists"), &cSharedMemory::exists);
 }
 

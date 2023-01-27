@@ -1,0 +1,76 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Main.gd" type="Script" id=1]
+[ext_resource path="res://Mob.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Player.tscn" type="PackedScene" id=3]
+[ext_resource path="res://HUD.tscn" type="PackedScene" id=4]
+[ext_resource path="res://art/House In a Forest Loop.ogg" type="AudioStream" id=5]
+[ext_resource path="res://art/gameover.wav" type="AudioStream" id=6]
+[ext_resource path="res://Coin.tscn" type="PackedScene" id=7]
+
+[sub_resource type="Curve2D" id=1]
+_data = {
+"points": PoolVector2Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 679.014, 0.160667, 0, 0, 0, 0, 679, 544, 0, 0, 0, 0, 679.328, 962.215, 0, 0, 0, 0, 337.568, 962.4, 0, 0, 0, 0, 0.48542, 961.167, 0, 0, 0, 0, 0, 0 )
+}
+
+[node name="Main" type="Node"]
+script = ExtResource( 1 )
+mob_scene = ExtResource( 2 )
+coin_scene = ExtResource( 7 )
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -1.0
+margin_right = -1.0
+margin_bottom = -2.0
+color = Color( 0.219608, 0.372549, 0.380392, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Player" parent="." instance=ExtResource( 3 )]
+
+[node name="Timer" type="Timer" parent="Player"]
+wait_time = 0.005
+
+[node name="HUD" parent="Player" instance=ExtResource( 4 )]
+
+[node name="MobTimer" type="Timer" parent="."]
+
+[node name="CoinTimer" type="Timer" parent="."]
+wait_time = 3.0
+
+[node name="ScoreTimer" type="Timer" parent="."]
+
+[node name="StartTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[node name="StartPosition" type="Position2D" parent="."]
+position = Vector2( 252.25, 254.85 )
+
+[node name="MobPath" type="Path2D" parent="."]
+scale = Vector2( 1.17771, 0.831203 )
+curve = SubResource( 1 )
+
+[node name="MobSpawnLocation" type="PathFollow2D" parent="MobPath"]
+rotation = 0.000236618
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 5 )
+
+[node name="DeathSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 6 )
+
+[node name="EndTimer" type="Timer" parent="."]
+wait_time = 20.0
+[connection signal="coin" from="Player" to="." method="get_coin"]
+[connection signal="hit" from="Player" to="." method="game_over"]
+[connection signal="timeout" from="Player/Timer" to="Player" method="_on_Timer_timeout"]
+[connection signal="start_game" from="Player/HUD" to="." method="new_game"]
+[connection signal="timeout" from="MobTimer" to="." method="_on_MobTimer_timeout"]
+[connection signal="timeout" from="CoinTimer" to="." method="_on_CoinTimer_timeout"]
+[connection signal="timeout" from="ScoreTimer" to="." method="_on_ScoreTimer_timeout"]
+[connection signal="timeout" from="StartTimer" to="." method="_on_StartTimer_timeout"]
+[connection signal="timeout" from="EndTimer" to="." method="_on_EndTimer_timeout"]

@@ -13,8 +13,10 @@ using namespace boost::interprocess;
 
 typedef allocator<int, managed_shared_memory::segment_manager>  ShmemAllocatorInt;
 typedef allocator<float, managed_shared_memory::segment_manager>  ShmemAllocatorFloat;
+typedef allocator<uint8_t, managed_shared_memory::segment_manager>  ShmemAllocatorUint;
 typedef std::vector<int, ShmemAllocatorInt> IntVector;
 typedef std::vector<float, ShmemAllocatorFloat> FloatVector;
+typedef std::vector<uint8_t, ShmemAllocatorUint> UintVector;
 
 class cPersistentIntTensor{
 	private:
@@ -73,6 +75,34 @@ class cPersistentFloatTensor{
 			return T;
 		}
 };
+class cPersistentUintTensor{
+	private:
+		managed_shared_memory *segment = NULL;
+		UintVector *vector = NULL;
+		int size;
+		std::string *name = NULL;
+	public:
+		cPersistentUintTensor(UintVector *_vector, const std::string &_name, managed_shared_memory *_segment) {
+			vector = _vector;
+			size = vector->size();
+			segment = _segment;
+			name = new std::string(_name);
+		}
+		~cPersistentUintTensor(){
+			segment->destroy<UintVector>(name->c_str());
+			delete name;
+		}
+		void write(torch::Tensor T){
+			for(int i = 0; i < size; i++)
+				(*vector)[i] = T.data_ptr<int>()[i];
+		};
+		torch::Tensor read(){
+			torch::Tensor T = torch::from_blob(vector->data(), {static_cast<int64_t>(vector->size())},
+			        torch::TensorOptions().dtype(torch::kU8).device(torch::kCPU));
+
+			return T.clone();
+		}
+};
 
 class cSharedMemoryTensor{
 
@@ -87,6 +117,7 @@ class cSharedMemoryTensor{
 		
 		cPersistentIntTensor* newIntTensor(const std::string &name, int size);
 		cPersistentFloatTensor* newFloatTensor(const std::string &name, int size);
+		cPersistentUintTensor* newUintTensor(const std::string &name, int size);
 };
 
 class cSharedMemorySemaphore{
