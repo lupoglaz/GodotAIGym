@@ -25,7 +25,7 @@ $ python env_test.py
 $ ./run_reinforcement_learning.sh 1
 ```
 
-| :exclamation:  Please ignore the below error when running the learner.py file. It can be ignored. |
+| :warning:  Please ignore the below error when running the learner.py file. It can be ignored. |
 ```
 Traceback (most recent call last):
   File "learner.py", line 381, in <module>
