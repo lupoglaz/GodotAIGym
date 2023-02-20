@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+import os
+import sys
+
+env = SConscript("godot-cpp/SConstruct")
+
+# env_shmem = env.Clone()
+# env_shmem.Append(CPPPATH=["SharedMemory/"])
+# shmem_sources = Glob("SharedMemory/*.cpp")
+# env_shmem.Append(LIBS=["boost_system"])
+
+
+# if env_shmem["platform"] == "macos":
+#     shmem_library = env_shmem.SharedLibrary(
+#         "GDExtension/SharedMemory/libgdsharedmemory.{}.{}.framework/libgdsharedmemory.{}.{}".format(
+#             env_shmem["platform"], env_shmem["target"], env_shmem["platform"], env_shmem["target"]
+#         ),
+#         source=shmem_sources,
+#     )
+# else:
+#     shmem_library = env_shmem.SharedLibrary(
+#         "GDExtension/SharedMemory/libgdsharedmemory{}{}".format(env_shmem["suffix"], env_shmem["SHLIBSUFFIX"]),
+#         source=shmem_sources,
+#     )
+
+# Default(shmem_library)
+
+
+env_torch = env.Clone()
+#Currently static linking does not work
+#Shared libraries should be in the torch_rlibdirs directory
+
+torch_rlibdirs = [
+    os.path.join(Dir('.').abspath, 'libtorch/lib'), "."]
+
+torch_include = [
+    "libtorch/include",
+    "libtorch/include/torch/csrc/api/include"
+]
+
+torch_libdirs = [
+    os.path.join(Dir('.').abspath, 'libtorch/lib'),
+    "/usr/lib/x86_64-linux-gnu",
+    "."
+]
+
+#torch_libnames_cpu = ["boost_system", "stdc++", "m", "torch", "caffe2", "c10", "pthread", "dl", "rt", "X11"]
+torch_libnames_cpu = ["boost_system", "stdc++", "m", "torch_cpu", "torch", "c10", "pthread", "dl", "rt", "X11"]
+
+torch_libnames_cpu += ["fbgemm", "nnpack", "asmjit", "benchmark", "benchmark_main",
+			"Caffe2_perfkernels_avx",  "Caffe2_perfkernels_avx2", "Caffe2_perfkernels_avx512", "caffe2_protos",
+			"clog", "cpuinfo", "dnnl", "gloo", "gmock", "gmock_main", "nnpack_reference_layers", "onnx",
+			"onnx_proto", "protobuf", "protobuf-lite", "qnnpack", "tensorpipe", "tensorpipe_uv", "XNNPACK",
+			"cpuinfo_internals", "foxi_loader", "gtest", "gtest_main", "mkldnn", "protoc", "pthreadpool",
+			"pytorch_qnnpack"]
+torch_libnames_cpu += ["pytorch_jni", "shm", "torchbind_test", "torch_global_deps", "caffe2_detectron_ops",
+			"caffe2_observers", "jitbackend_test", "fmt", "fbjni", "caffe2_module_test_dynamic"
+			#"torch_python", "process_group_agent", "tensorpipe_agent", "gomp-7c85b1e2", "c10d",
+			]
+
+env_torch.Append(LINKFLAGS=['-Wl,--no-undefined', '-Wl,--no-as-needed'])
+env_torch.Append(CPPPATH=torch_include)
+env_torch.Append(LIBPATH=torch_libdirs)
+env_torch.Append(RPATH=torch_rlibdirs)
+env_torch.Append(LIBS=torch_libnames_cpu)
+env_torch.Append(CPPDEFINES={'-D_GLIBCXX_USE_CXX14_ABI' : 0 })
+env_torch.Append(CPPDEFINES={'-D_GLIBCXX_USE_CXX11_ABI' : 0 })
+env_torch.Append(CXXFLAGS=['-O2', '-Wall', '-std=gnu++14', '-fPIC'])
+
+env_torch.Append(CPPPATH=["TorchModel/"])
+torch_sources = Glob("TorchModel/*.cpp")
+env_torch.Append(LINKFLAGS=['-Wl,--no-undefined', '-Wl,--no-as-needed'])
+
+
+if env_torch["platform"] == "macos":
+    torch_library = env_torch.SharedLibrary(
+        "GDExtension/SharedMemory/libgdsharedmemory.{}.{}.framework/libgdsharedmemory.{}.{}".format(
+            env_torch["platform"], env_torch["target"], env_torch["platform"], env_torch["target"]
+        ),
+        source=torch_sources,
+    )
+else:
+    torch_library = env_torch.SharedLibrary(
+        "GDExtension/SharedMemory/libgdsharedmemory{}{}".format(env_torch["suffix"], env_torch["SHLIBSUFFIX"]),
+        source=torch_sources,
+    )
+
+Default(torch_library)
+# env.Append(LIBPATH=torch_libdirs)
+# env.Append(RPATH=torch_rlibdirs)
+# env.Append(LIBS=torch_libnames_cpu)

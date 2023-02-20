@@ -1,3 +1,9 @@
+#Sconstruct
+.sconsign*
+
+#VSCode
+.vscode/*
+
 #Libtorch
 */libtorch/*
 libtorch/*
