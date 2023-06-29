@@ -65,7 +65,7 @@ env_torch.Append(RPATH=torch_rlibdirs)
 env_torch.Append(LIBS=torch_libnames_cpu)
 env_torch.Append(CPPDEFINES={'-D_GLIBCXX_USE_CXX14_ABI' : 0 })
 env_torch.Append(CPPDEFINES={'-D_GLIBCXX_USE_CXX11_ABI' : 0 })
-env_torch.Append(CXXFLAGS=['-O2', '-Wall', '-std=gnu++14', '-fPIC'])
+env_torch.Append(CXXFLAGS=['-O2', '-Wall', '-std=gnu++17', '-fPIC'])
 
 env_torch.Append(CPPPATH=["TorchModel/"])
 torch_sources = Glob("TorchModel/*.cpp")

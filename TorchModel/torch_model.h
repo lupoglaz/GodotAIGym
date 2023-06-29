@@ -1,12 +1,17 @@
 /* cSharedMemory.h */
-#ifndef SHARED_MEMORY_H
-#define SHARED_MEMORY_H
+#ifndef TORCH_MODEL_H
+#define TORCH_MODEL_H
 
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/templates/vector.hpp>
 #include <godot_cpp/variant/builtin_types.hpp>
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/class_db.hpp>
+#include "godot_cpp/variant/variant.hpp"
+#include <godot_cpp/classes/resource_format_loader.hpp>
+#include <godot_cpp/classes/resource.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
+#include <godot_cpp/godot.hpp>
 using namespace godot;
 
 #include <string>
@@ -24,7 +29,7 @@ class cTorchModelData : public Resource{
     GDCLASS(cTorchModelData, Resource);
 
     private:
-        PoolByteArray content;
+        PackedByteArray content;
         
     protected:
         static void _bind_methods(){
@@ -35,73 +40,69 @@ class cTorchModelData : public Resource{
 
     public:
         void load(const char *_data, size_t size){
-            print_line("Converting string to PoolByteArray");
+            // print_line("Converting string to TypedArray<char>");
             //Convert model to poolbytearray
             content.resize(size);
             for(long i=0; i<size; i++)
-                content.set(i,_data[i]);
+                content[i] = _data[i];
         };
         long size() const{
             return content.size();
         }
         void save(char *_data) const{
-            print_line("Converting PoolByteArray to string");
+            // print_line("Converting TypedArray<char> to string");
             for(int i=0; i<content.size(); i++)
                 _data[i] = content[i];
         }
 
-        void set_array(const PoolByteArray &p_array){
+        void set_array(const PackedByteArray &p_array){
             content = p_array;
         };
-        PoolByteArray get_array() const{
+        PackedByteArray get_array() const{
             return content;
         };
-
-        
-
 };
 
 class cTorchModelLoader : public ResourceFormatLoader {
     GDCLASS(cTorchModelLoader, ResourceFormatLoader);
+protected:
+	static void _bind_methods() {}
 public:
-    virtual RES load(const String &p_path, const String &p_original_path, Error *r_error = NULL){
-        print_line("Loading from file to ModelData");
+    virtual Variant _load(const String &p_path, const String &p_original_path, bool use_sub_threads, int32_t cache_mode) const{
+        // print_line("Loading from file to ModelData");
         //Load file in the resources to a model
-        if (r_error) {
-            *r_error = OK;
-        }
-        String r_path;
-        if (ProjectSettings::get_singleton()) {
-        	if (p_path.begins_with("res://")) {
-        		String resource_path = ProjectSettings::get_singleton()->get_resource_path();
-        		if (resource_path != "") {
-        			r_path = p_path.replace("res:/", resource_path);
-        		}
-        		r_path = p_path.replace("res://", "");
-        	}
-        }
-        torch::jit::script::Module module = torch::jit::load(r_path.ascii().get_data());
+        // String r_path;
+        // if (ProjectSettings::get_singleton()) {
+        // 	if (p_path.begins_with("res://")) {
+        // 		String resource_path = ProjectSettings::get_singleton()->get_resource_path();
+        // 		if (resource_path != "") {
+        // 			r_path = p_path.replace("res:/", resource_path);
+        // 		}
+        // 		r_path = p_path.replace("res://", "");
+        // 	}
+        // }
+        torch::jit::script::Module module = torch::jit::load(p_path.ascii().get_data());
         std::stringstream str;
         torch::jit::ExportModule(module, str);
         Ref<cTorchModelData> model_data = memnew(cTorchModelData);
         model_data->load(str.str().c_str(), str.str().size());
         return model_data;
     }
-    virtual void get_recognized_extensions(List<String> *r_extensions) const{
-        if (!r_extensions->find("jit")) {
-            r_extensions->push_back("jit");
-        }
+    virtual PackedStringArray _get_recognized_extensions() const{
+        PackedStringArray psa;
+	    psa.append("jit");
+	    return psa;
     }
-    virtual bool handles_type(const String &p_type) const{
-        return ClassDB::is_parent_class(p_type, "cTorchModelData");
+    virtual bool _handles_type(const String &p_type) const{
+        return p_type.to_lower().contains("ctorchmodeldata");
     }
-    virtual String get_resource_type(const String &p_path) const{
+    virtual String _get_resource_type(const String &p_path) const{
         return "cTorchModelData";
     }
 };
 
-class cTorchModel : public Reference {
-    GDCLASS(cTorchModel, Reference);
+class cTorchModel : public RefCounted {
+    GDCLASS(cTorchModel, RefCounted);
     private:
         torch::jit::script::Module module;
         cTorchModelData module_data;
@@ -124,17 +125,18 @@ class cTorchModel : public Reference {
 
         void init(const Ref<cTorchModelData> &data){
             //Load model from pool byte array
-            print_line("Loading from ModelData");
+            // print_line("Loading from ModelData");
             char str[data->size()];
             data->save(&str[0]);
             std::stringstream strstream(std::string(str, data->size()));
             this->module = torch::jit::load(strstream);
         }
 
-        PoolVector<float> run(const PoolVector<float> &input){
-            PoolVector<float> output;
-            at::Tensor input_t = torch::zeros({1, input.size()}, torch::TensorOptions().dtype(torch::kFloat32));
-            for(int i=0; i<input.size(); i++) input_t.index_put_({0,i}, input[i]);
+        PackedFloat32Array run(PackedFloat32Array input){
+            PackedFloat32Array output;
+            // at::Tensor input_t = torch::zeros({1, input.size()}, torch::TensorOptions().dtype(torch::kFloat32));
+            // for(int i=0; i<input.size(); i++) input_t.index_put_({0,i}, input[i]);
+            at::Tensor input_t = torch::from_blob(input.ptrw(), {1, input.size()});
             std::vector<torch::jit::IValue> inputs;
             inputs.push_back(input_t);
             at::Tensor output_t = this->module.forward(inputs).toTensor();

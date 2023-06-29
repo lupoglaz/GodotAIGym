@@ -7,7 +7,7 @@ from zipfile import ZipFile
 from pathlib import Path
 
 # GODOT_PATH = os.environ["GODOT_PATH"]
-GODOT_PATH = "/home/lupoglaz/Projects/godot32"
+# GODOT_PATH = "/home/lupoglaz/Projects/godot32"
 
 def download_unpack(rewrite=False):
 	url = 'https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-1.10.1%2Bcpu.zip'
@@ -30,7 +30,7 @@ def install_python_module():
 	os.chdir(current_path)
 
 if __name__=='__main__':
-	assert os.path.exists(GODOT_PATH)
+	# assert os.path.exists(GODOT_PATH)
 	
 	download_unpack(rewrite=False)
 	install_python_module()
