@@ -1,4 +1,5 @@
 #Sconstruct
+GDExtension/*
 .sconsign*
 *.os
 
