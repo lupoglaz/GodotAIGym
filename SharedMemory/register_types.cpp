@@ -13,6 +13,9 @@ void initialize_cSharedMemory_types(ModuleInitializationLevel p_level)
 		return;
 	}
 	ClassDB::register_class<cSharedMemory>();
+	ClassDB::register_class<cPersistentIntTensor>();
+	ClassDB::register_class<cPersistentFloatTensor>();
+	ClassDB::register_class<cSharedMemorySemaphore>();
 }
 
 void uninitialize_cSharedMemory_types(ModuleInitializationLevel p_level) {

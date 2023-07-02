@@ -13,7 +13,7 @@ func _ready():
 	set_physics_process(true)
 
 func _integrate_forces(state):
-	set_applied_torque(torque)
+	set_constant_torque(torque)
 	if reset:
 		var T = Transform2D(0.0, init_anchor)
 		var Tt = Transform2D(0.0, -init_anchor)

@@ -4,26 +4,26 @@ import sys
 
 env = SConscript("godot-cpp/SConstruct")
 
-# env_shmem = env.Clone()
-# env_shmem.Append(CPPPATH=["SharedMemory/"])
-# shmem_sources = Glob("SharedMemory/*.cpp")
-# env_shmem.Append(LIBS=["boost_system"])
+env_shmem = env.Clone()
+env_shmem.Append(CPPPATH=["SharedMemory/"])
+shmem_sources = Glob("SharedMemory/*.cpp")
+env_shmem.Append(LIBS=["boost_system"])
 
 
-# if env_shmem["platform"] == "macos":
-#     shmem_library = env_shmem.SharedLibrary(
-#         "GDExtension/SharedMemory/libgdsharedmemory.{}.{}.framework/libgdsharedmemory.{}.{}".format(
-#             env_shmem["platform"], env_shmem["target"], env_shmem["platform"], env_shmem["target"]
-#         ),
-#         source=shmem_sources,
-#     )
-# else:
-#     shmem_library = env_shmem.SharedLibrary(
-#         "GDExtension/SharedMemory/libgdsharedmemory{}{}".format(env_shmem["suffix"], env_shmem["SHLIBSUFFIX"]),
-#         source=shmem_sources,
-#     )
+if env_shmem["platform"] == "macos":
+    shmem_library = env_shmem.SharedLibrary(
+        "build/libgdsharedmemory.{}.{}.framework/libgdsharedmemory.{}.{}".format(
+            env_shmem["platform"], env_shmem["target"], env_shmem["platform"], env_shmem["target"]
+        ),
+        source=shmem_sources,
+    )
+else:
+    shmem_library = env_shmem.SharedLibrary(
+        "build/libgdsharedmemory{}{}".format(env_shmem["suffix"], env_shmem["SHLIBSUFFIX"]),
+        source=shmem_sources,
+    )
 
-# Default(shmem_library)
+Default(shmem_library)
 
 
 env_torch = env.Clone()
@@ -74,18 +74,18 @@ env_torch.Append(LINKFLAGS=['-Wl,--no-undefined', '-Wl,--no-as-needed'])
 
 if env_torch["platform"] == "macos":
     torch_library = env_torch.SharedLibrary(
-        "GDExtension/SharedMemory/libgdsharedmemory.{}.{}.framework/libgdsharedmemory.{}.{}".format(
+        "build/libgdtorchmodel.{}.{}.framework/libgdtorchmodel.{}.{}".format(
             env_torch["platform"], env_torch["target"], env_torch["platform"], env_torch["target"]
         ),
         source=torch_sources,
     )
 else:
     torch_library = env_torch.SharedLibrary(
-        "GDExtension/SharedMemory/libgdsharedmemory{}{}".format(env_torch["suffix"], env_torch["SHLIBSUFFIX"]),
+        "build/libgdtorchmodel{}{}".format(env_torch["suffix"], env_torch["SHLIBSUFFIX"]),
         source=torch_sources,
     )
 
 Default(torch_library)
-# env.Append(LIBPATH=torch_libdirs)
-# env.Append(RPATH=torch_rlibdirs)
-# env.Append(LIBS=torch_libnames_cpu)
+env.Append(LIBPATH=torch_libdirs)
+env.Append(RPATH=torch_rlibdirs)
+env.Append(LIBS=torch_libnames_cpu)

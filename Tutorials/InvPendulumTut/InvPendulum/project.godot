@@ -6,27 +6,23 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
-
-_global_script_classes=[  ]
-_global_script_class_icons={
-
-}
+config_version=5
 
 [application]
 
 config/name="InvPendulum"
 run/main_scene="res://Environment.tscn"
+config/features=PackedStringArray("4.0")
 config/icon="res://icon.png"
 
 [display]
 
-window/size/width=320
-window/size/height=200
-window/size/test_width=640
-window/size/test_height=480
-window/vsync/use_vsync=false
+window/size/viewport_width=320
+window/size/viewport_height=200
+window/size/window_width_override=640
+window/size/window_height_override=480
 window/stretch/mode="2d"
+window/vsync/vsync_mode=false
 
 [physics]
 
@@ -36,17 +32,16 @@ window/stretch/mode="2d"
 
 [rendering]
 
+shading/overrides/force_vertex_shading.mobile=false
+shading/overrides/force_lambert_over_burley.mobile=false
+driver/depth_prepass/enable=false
+environment/defaults/default_environment="res://default_env.tres"
 quality/driver/driver_name="GLES2"
 quality/intended_usage/framebuffer_allocation=0
 quality/intended_usage/framebuffer_allocation.mobile=0
 vram_compression/import_etc=true
-vram_compression/import_etc2=false
 quality/reflections/texture_array_reflections=false
 quality/reflections/high_quality_ggx=false
-quality/shading/force_vertex_shading.mobile=false
-quality/shading/force_lambert_over_burley.mobile=false
-quality/shading/force_blinn_over_ggx.mobile=false
-quality/depth_prepass/enable=false
+shading/overrides/force_blinn_over_ggx.mobile=false
 quality/depth/hdr=false
-environment/default_environment="res://default_env.tres"
 quality/dynamic_fonts/use_oversampling=false

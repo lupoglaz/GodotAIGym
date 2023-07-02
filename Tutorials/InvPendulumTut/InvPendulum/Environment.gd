@@ -15,7 +15,7 @@ var reward_tensor
 var done_tensor
 
 
-onready var policy_data = load("res://ddpg_policy.tres")
+@onready var policy_data = load("res://ddpg_policy.tres")
 var policy
 var policy_action
 
@@ -57,8 +57,8 @@ func _ready():
 	var v = $Anchor/PinJoint2D/RigidBody2D.transform.get_origin()
 	var AnchorT = $Anchor.transform
 	var JointT = $Anchor/PinJoint2D.transform
-	$Anchor/PinJoint2D/RigidBody2D.init_anchor = AnchorT.xform(JointT.get_origin())
-	$Anchor/PinJoint2D/RigidBody2D.init_origin = AnchorT.xform(JointT.xform(v))
+	$Anchor/PinJoint2D/RigidBody2D.init_anchor = AnchorT * (JointT.get_origin())
+	$Anchor/PinJoint2D/RigidBody2D.init_origin = AnchorT * (JointT.xform(v))
 	$Anchor/PinJoint2D/RigidBody2D.init_rotation = 0.0
 	$Anchor/PinJoint2D/RigidBody2D.init_angular_velocity = 1.0
 	$Anchor/PinJoint2D/RigidBody2D.reset = true
@@ -73,10 +73,10 @@ func is_done():
 	
 func _process(delta):
 	if mem.exists():
-		var cur_time = OS.get_ticks_usec()
+		var cur_time = Time.get_ticks_usec()
 		var fps_est = 1000000.0/(cur_time - prev_time - sem_delta)
-		Engine.set_iterations_per_second(fps_est)
-		Engine.set_time_scale(Engine.get_iterations_per_second()*target_delta)
+		Engine.set_physics_ticks_per_second(fps_est)
+		Engine.set_time_scale(Engine.get_physics_ticks_per_second()*target_delta)
 		sem_delta = 0.0
 		prev_time = cur_time
 	
@@ -84,9 +84,9 @@ func _physics_process(delta):
 	if timeout:
 		sem_physics.wait()
 		if mem.exists():
-			var time_start = OS.get_ticks_usec()
+			var time_start = Time.get_ticks_usec()
 			sem_action.wait()
-			var time_end = OS.get_ticks_usec()
+			var time_end = Time.get_ticks_usec()
 			sem_delta = time_end - time_start
 			agent_action = agent_action_tensor.read()
 			env_action = env_action_tensor.read()

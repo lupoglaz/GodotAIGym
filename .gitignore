@@ -2,6 +2,13 @@
 GDExtension/*
 .sconsign*
 *.os
+/.godot/*
+*/.godot/*
+bin/*
+*/bin/
+*/bin/
+*.cache
+*.gdextension
 
 #VSCode
 .vscode/*
