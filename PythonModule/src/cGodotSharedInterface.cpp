@@ -1,24 +1,25 @@
 #include "cGodotSharedInterface.h"
 #include <sstream>
 
-cSharedMemoryTensor::cSharedMemoryTensor(const std::string &name){
+cSharedMemory::cSharedMemory(const std::string &name){
 	segment_name = new std::string(name);
 	try{
 		//Create a managed shared memory segment
 		shared_memory_object::remove(segment_name->c_str());
 		segment = new managed_shared_memory(create_only, segment_name->c_str(), 65536);
+		std::cout<<"Created segment "<<name<<std::endl;
 	}catch (interprocess_exception& ex) {
-	std::cout<<"PythonModule:cSharedMemoryTensor:"<<name<<":"<<boost::diagnostic_information(ex)<<ex.get_native_error()<<std::endl;
+		std::cout<<"PythonModule:cSharedMemory:"<<name<<":"<<boost::diagnostic_information(ex)<<ex.get_native_error()<<std::endl;
 		shared_memory_object::remove(segment_name->c_str());
 	}
 }
-cSharedMemoryTensor::~cSharedMemoryTensor(){
+cSharedMemory::~cSharedMemory(){
 	shared_memory_object::remove(segment_name->c_str());
 	delete segment;
 	delete segment_name;
 }
 
-cPersistentIntTensor* cSharedMemoryTensor::newIntTensor(const std::string &name, int size){
+cPersistentIntTensor* cSharedMemory::newIntTensor(const std::string &name, int size){
 	const ShmemAllocatorInt alloc_inst(segment->get_segment_manager());
 	IntVector *myvector = segment->construct<IntVector>(name.c_str())(alloc_inst);
 	if(myvector == NULL){
@@ -32,7 +33,7 @@ cPersistentIntTensor* cSharedMemoryTensor::newIntTensor(const std::string &name,
 	return tensor;
 }
 
-cPersistentFloatTensor* cSharedMemoryTensor::newFloatTensor(const std::string &name, int size){
+cPersistentFloatTensor* cSharedMemory::newFloatTensor(const std::string &name, int size){
 	const ShmemAllocatorFloat alloc_inst(segment->get_segment_manager());
 	FloatVector *myvector = segment->construct<FloatVector>(name.c_str())(alloc_inst);
 	if(myvector == NULL){

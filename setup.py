@@ -76,7 +76,7 @@ if __name__=='__main__':
 	# assert os.path.exists(GODOT_PATH)
 	
 	# download_unpack(rewrite=True)
-	# install_python_module()
+	install_python_module()
 	build_scons()
 	
 

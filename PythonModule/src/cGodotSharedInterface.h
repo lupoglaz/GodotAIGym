@@ -74,7 +74,7 @@ class cPersistentFloatTensor{
 		}
 };
 
-class cSharedMemoryTensor{
+class cSharedMemory{
 
 	private:
 
@@ -82,8 +82,8 @@ class cSharedMemoryTensor{
 		managed_shared_memory *segment = NULL;
 	public:
 		
-		cSharedMemoryTensor(const std::string &name);
-		~cSharedMemoryTensor();
+		cSharedMemory(const std::string &name);
+		~cSharedMemory();
 		
 		cPersistentIntTensor* newIntTensor(const std::string &name, int size);
 		cPersistentFloatTensor* newFloatTensor(const std::string &name, int size);

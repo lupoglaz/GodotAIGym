@@ -14,10 +14,10 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 		.def("read", &cPersistentFloatTensor::read)
 		.def("write", &cPersistentFloatTensor::write);
     
-	py::class_<cSharedMemoryTensor>(m, "SharedMemoryTensor")
+	py::class_<cSharedMemory>(m, "SharedMemory")
 		.def(py::init<const std::string &>())
-		.def("newIntTensor", &cSharedMemoryTensor::newIntTensor)
-		.def("newFloatTensor", &cSharedMemoryTensor::newFloatTensor);
+		.def("newIntTensor", &cSharedMemory::newIntTensor)
+		.def("newFloatTensor", &cSharedMemory::newFloatTensor);
 
 	py::class_<cSharedMemorySemaphore>(m, "SharedMemorySemaphore")
 		.def(py::init<const std::string &, int>())

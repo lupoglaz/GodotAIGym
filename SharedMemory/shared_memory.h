@@ -130,8 +130,8 @@ class cSharedMemorySemaphore : public RefCounted {
             delete mutex;
         };
         void init(const String &sem_name){
-            // name = sem_name;
-            // std::cout<<"Constructing semaphore "<<*name<<std::endl;
+            name = sem_name;
+            std::cout<<"Constructing semaphore "<<std::endl;//<<*name<<std::endl;
             try{
                 shared_memory_object object(open_only, (const char*)sem_name.ptr(), read_write);
                 region = new mapped_region(object, read_write);
@@ -139,19 +139,19 @@ class cSharedMemorySemaphore : public RefCounted {
                 //print_line(String("cSharedMemorySemaphore:init:")+String((*name).c_str())+String(":")+String(boost::diagnostic_information(e).c_str()));
                 //shared_memory_object::remove(name->c_str());
             }
-            // std::cout<<"Constructed semaphore "<<*name<<std::endl;
+            std::cout<<"Constructed semaphore "<<std::endl;//<<*name<<std::endl;
         };
         void post(){
-            // std::cout<<"Post semaphore "<<*name<<std::endl;
+            std::cout<<"Post semaphore "<<std::endl;//<<*name<<std::endl;
             mutex = static_cast<interprocess_semaphore*>(region->get_address());
             mutex->post();
-            // std::cout<<"Posted semaphore "<<*name<<std::endl;
+            std::cout<<"Posted semaphore "<<std::endl;//<<*name<<std::endl;
         };
         void wait(){
-            // std::cout<<"Wait semaphore "<<*name<<std::endl;
+            std::cout<<"Wait semaphore "<<std::endl;//<<*name<<std::endl;
             mutex = static_cast<interprocess_semaphore*>(region->get_address());
             mutex->wait();
-            // std::cout<<"Waited semaphore "<<*name<<std::endl;
+            std::cout<<"Waited semaphore "<<std::endl;//<<*name<<std::endl;
         };
 };
 
