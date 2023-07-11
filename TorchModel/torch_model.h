@@ -72,7 +72,7 @@ protected:
 	static void _bind_methods() {}
 public:
     virtual Variant _load(const String &p_path, const String &p_original_path, bool use_sub_threads, int32_t cache_mode) const{
-        WARN_PRINT( (String("Loading from file to ModelData") + p_path).ptr());
+        WARN_PRINT( (String("Loading from file to ModelData ") + p_path).ptr());
         //Load file in the resources to a model
         String glob_path;
         if(OS::get_singleton()->has_feature("editor")){
@@ -80,7 +80,7 @@ public:
         }else{
             glob_path = OS::get_singleton()->get_executable_path().get_base_dir().path_join(p_path);
         }
-        WARN_PRINT( (String("Converted path to ") + glob_path).ptr() );
+        // WARN_PRINT( (String("Converted path to ") + glob_path).ptr() );
         
         torch::jit::script::Module module = torch::jit::load(glob_path.ascii().get_data());
         std::stringstream str;
@@ -93,15 +93,15 @@ public:
     virtual PackedStringArray _get_recognized_extensions() const{
         PackedStringArray psa;
 	    psa.append("jit");
-        WARN_PRINT( (String("Recognized extensions ") + psa[0]).ptr() );
+        // WARN_PRINT( (String("Recognized extensions ") + psa[0]).ptr() );
 	    return psa;
     }
     virtual bool _handles_type(const String &p_type) const{
-        WARN_PRINT( (String("Handles resource type ") + p_type).ptr() );
+        // WARN_PRINT( (String("Handles resource type ") + p_type).ptr() );
         return p_type.to_lower().contains("torchmodel");
     }
     virtual String _get_resource_type(const String &p_path) const{
-        WARN_PRINT( (String("Get resource type ") + p_path).ptr() );
+        // WARN_PRINT( (String("Get resource type ") + p_path).ptr() );
         String el = p_path.get_extension().to_lower();
 	    if (el == "jit") {
             return "TorchModel";
@@ -148,8 +148,8 @@ class cTorchModel : public RefCounted {
             // at::Tensor input_t = torch::zeros({1, input.size()}, torch::TensorOptions().dtype(torch::kFloat32));
             // for(int i=0; i<input.size(); i++) input_t.index_put_({0,i}, input[i]);
             at::Tensor input_t = torch::from_blob(input.ptrw(), {input.size()});
-            WARN_PRINT(String::num_int64(input.size()).ptr());
-            WARN_PRINT((String("") + String::num_int64(input_t.sizes()[0])).ptr());
+            // WARN_PRINT(String::num_int64(input.size()).ptr());
+            // WARN_PRINT((String("") + String::num_int64(input_t.sizes()[0])).ptr());
             std::vector<torch::jit::IValue> inputs;
             inputs.push_back(input_t);
             at::Tensor output_t = this->module.forward(inputs).toTensor();
