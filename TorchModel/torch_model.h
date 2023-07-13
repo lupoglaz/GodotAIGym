@@ -147,14 +147,14 @@ class cTorchModel : public RefCounted {
             PackedFloat32Array output;
             // at::Tensor input_t = torch::zeros({1, input.size()}, torch::TensorOptions().dtype(torch::kFloat32));
             // for(int i=0; i<input.size(); i++) input_t.index_put_({0,i}, input[i]);
-            at::Tensor input_t = torch::from_blob(input.ptrw(), {input.size()});
+            at::Tensor input_t = torch::from_blob(input.ptrw(), {1, input.size()});
             // WARN_PRINT(String::num_int64(input.size()).ptr());
             // WARN_PRINT((String("") + String::num_int64(input_t.sizes()[0])).ptr());
             std::vector<torch::jit::IValue> inputs;
             inputs.push_back(input_t);
             at::Tensor output_t = this->module.forward(inputs).toTensor();
-            auto output_t_a = output_t.accessor<float, 1>();
-            for(int i=0; i<output_t.sizes()[0]; i++) output.push_back(output_t_a[i]);
+            auto output_t_a = output_t.accessor<float, 2>();
+            for(int i=0; i<output_t.sizes()[1]; i++) output.push_back(output_t_a[0][i]);
             return output;
         }
 };
