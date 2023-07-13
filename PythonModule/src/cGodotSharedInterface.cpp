@@ -6,7 +6,7 @@ cSharedMemory::cSharedMemory(const std::string &name){
 	try{
 		//Create a managed shared memory segment
 		shared_memory_object::remove(segment_name->c_str());
-		segment = new managed_shared_memory(create_only, segment_name->c_str(), 65536);
+		segment = new managed_shared_memory(open_or_create, segment_name->c_str(), 65536);
 		std::cout<<"Created segment "<<name<<std::endl;
 	}catch (interprocess_exception& ex) {
 		std::cout<<"PythonModule:cSharedMemory:"<<name<<":"<<boost::diagnostic_information(ex)<<ex.get_native_error()<<std::endl;

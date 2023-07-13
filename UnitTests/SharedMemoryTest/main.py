@@ -30,7 +30,7 @@ class DummyEnv(gym.Env):
         pass
 
     def step(self, action):
-        print('Writing action')
+        # print('Writing action')
         # self.agent_action_tensor.write(action)
         # self.sem_act.wait()
 
@@ -55,7 +55,9 @@ class DummyEnv(gym.Env):
 if __name__=='__main__':
     env = DummyEnv('./SharedMemoryTest.x86_64', 1, 1)
     act = torch.tensor([8.0])
-    for i in range(100):
-        print(f'Action step {i} : {act}')
+    # for i in range(100):
+    i = 10
+    while True:
+        # print(f'Action step {i} : {act}')
         obs, _, _, _ = env.step(act)
-        print(f'Observation step {i} : {obs}')
+        # print(f'Observation step {i} : {obs}')
